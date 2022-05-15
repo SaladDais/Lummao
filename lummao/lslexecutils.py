@@ -121,7 +121,7 @@ def boolnot(val):
     return int(not val)
 
 
-def prepostincrdecr(sym_scope, sym_name, mod_amount, post, member_idx=None):
+def prepostincrdecr(sym_scope, sym_name, mod_amount, post, member_idx, frame):
     """
     ++i, --i, i++, i--, vec.x++, and so on.
 
@@ -150,13 +150,28 @@ def prepostincrdecr(sym_scope, sym_name, mod_amount, post, member_idx=None):
     # Force an update of the locals array from locals dict (if we were dealing with a locals dict)
     # Only works if the locals dict is from the immediate caller!
     # We could remove this requirement by representing "locals" with a class that holds all locals,
-    # but that'd be annoying, wouldn't it.
-    frame = sys._getframe(1)  # noqa
+    # but that'd be annoying, wouldn't it. On second thought, maybe we should.
     ctypes.pythonapi.PyFrame_LocalsToFast(ctypes.py_object(frame), ctypes.c_int(0))
 
     if post:
         return orig_val
     return new_val
+
+
+def preincr(sym_scope, sym_name, member_idx=None):
+    return prepostincrdecr(sym_scope, sym_name, 1, False, member_idx, sys._getframe(1))  # noqa
+
+
+def postincr(sym_scope, sym_name, member_idx=None):
+    return prepostincrdecr(sym_scope, sym_name, 1, True, member_idx, sys._getframe(1))  # noqa
+
+
+def predecr(sym_scope, sym_name, member_idx=None):
+    return prepostincrdecr(sym_scope, sym_name, -1, False, member_idx, sys._getframe(1))  # noqa
+
+
+def postdecr(sym_scope, sym_name, member_idx=None):
+    return prepostincrdecr(sym_scope, sym_name, -1, True, member_idx, sys._getframe(1))  # noqa
 
 
 class StateChangeException(Exception):

@@ -324,13 +324,13 @@ class Script(BaseLSLScript):
         i = rmod(-1, -2147483648)
         self.ensureIntegerEqual("i = 0x80000000 & -1;", i, 0)
         i = 1
-        self.ensureIntegerEqual("postinc", rbooland((req(1, prepostincrdecr(locals(), "i", 1, 1, None))), (req(2, i))), 1)
+        self.ensureIntegerEqual("postinc", rbooland((req(1, postincr(locals(), "i"))), (req(2, i))), 1)
         i = 1
-        self.ensureIntegerEqual("preinc", rbooland((req(2, prepostincrdecr(locals(), "i", 1, 0, None))), (req(2, i))), 1)
+        self.ensureIntegerEqual("preinc", rbooland((req(2, preincr(locals(), "i"))), (req(2, i))), 1)
         i = 2
-        self.ensureIntegerEqual("postdec", rbooland((req(2, prepostincrdecr(locals(), "i", -1, 1, None))), (req(1, i))), 1)
+        self.ensureIntegerEqual("postdec", rbooland((req(2, postdecr(locals(), "i"))), (req(1, i))), 1)
         i = 2
-        self.ensureIntegerEqual("predec1", rbooland((req(1, prepostincrdecr(locals(), "i", -1, 0, None))), (req(1, i))), 1)
+        self.ensureIntegerEqual("predec1", rbooland((req(1, predecr(locals(), "i"))), (req(1, i))), 1)
         i = 2
         i -= 1
         self.ensureIntegerEqual("predec2", i, 1)

@@ -472,20 +472,24 @@ bool PythonVisitor::visit(LSLUnaryExpression *unary_expr) {
       // this is in expression context, not statement context. We need to emulate the
       // side-effects of ++foo and foo++ in an expression, since that construct doesn't exist
       // in python.
-      mStr << "prepostincrdecr(";
+      if (post)
+        mStr << "post";
+      else
+        mStr << "pre";
+
+      if (negative)
+        mStr << "decr";
+      else
+        mStr << "incr";
+
+      mStr << '(';
       if (global)
         mStr << "self.__dict__";
       else
         mStr << "locals()";
-      mStr << ", \"" << sym->getName() << "\", ";
-      if (negative)
-        mStr << '-';
-      child_expr->getType()->getOneValue()->visit(this);
-      mStr << ", " << post << ", ";
+      mStr << ", \"" << sym->getName() << "\"";
       if (auto *member = lvalue->getMember()) {
-        mStr << member_to_offset(member->getName());
-      } else {
-        mStr << "None";
+        mStr << ", " << member_to_offset(member->getName());
       }
       mStr << ')';
     } else {
