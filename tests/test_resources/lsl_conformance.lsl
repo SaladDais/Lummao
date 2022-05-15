@@ -646,8 +646,6 @@ tests()
 
 runTests()
 {
-    tests();
-    print("All tests passed");
     // reset globals
     gInteger = 5;
     gFloat = 1.5;
@@ -658,6 +656,8 @@ runTests()
     gTestsPassed = 0;
     gTestsFailed = 0;
     gCallOrder = [];
+    tests();
+    print("All tests passed");
 }
 
 default

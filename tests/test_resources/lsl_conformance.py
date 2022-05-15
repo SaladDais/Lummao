@@ -430,8 +430,6 @@ class Script(BaseLSLScript):
 
     @with_goto
     def runTests(self) -> None:
-        self.tests()
-        print("All tests passed")
         self.gInteger = 5
         self.gFloat = bin2float('1.500000', '0000c03f')
         self.gString = "foo"
@@ -441,6 +439,8 @@ class Script(BaseLSLScript):
         self.gTestsPassed = 0
         self.gTestsFailed = 0
         self.gCallOrder = []
+        self.tests()
+        print("All tests passed")
 
     @with_goto
     def edefaultstate_entry(self) -> None:
