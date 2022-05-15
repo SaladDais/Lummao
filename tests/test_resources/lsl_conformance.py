@@ -322,7 +322,7 @@ class Script(BaseLSLScript):
         i = rmod(1, i)
         self.ensureIntegerEqual("i = 3; i %= 1;", i, 0)
         i = rmod(-1, -2147483648)
-        self.ensureIntegerEqual("i = 0x80000000 & -1;", i, 0)
+        self.ensureIntegerEqual("i = 0x80000000 % -1;", i, 0)
         i = 1
         self.ensureIntegerEqual("postinc", rbooland((req(1, postincr(locals(), "i"))), (req(2, i))), 1)
         i = 1

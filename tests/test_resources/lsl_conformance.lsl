@@ -492,7 +492,7 @@ tests()
 
     // check overflow behaviour
     i = 0x80000000 % -1;
-    ensureIntegerEqual("i = 0x80000000 & -1;", i, 0);
+    ensureIntegerEqual("i = 0x80000000 % -1;", i, 0);
 
     // post increment.
     i = 1;
