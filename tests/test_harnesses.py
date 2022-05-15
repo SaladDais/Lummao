@@ -3,7 +3,7 @@ import unittest
 from .test_resources import lsl_conformance
 
 
-class ConformanceTestCase(unittest.TestCase):
+class HarnessTestCase(unittest.TestCase):
     def setUp(self) -> None:
         # Fresh version of the script for each test
         self.script = lsl_conformance.Script()
