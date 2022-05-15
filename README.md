@@ -9,6 +9,8 @@ It could conceivably be used for compile-time evaluation of pure functions with 
 The runtime is largely handled by the excellent implementation of LSL's basic operations and library functions
 from [LSL-PyOptimizer](https://github.com/Sei-Lisa/LSL-PyOptimizer).
 
+To see an example input script and its Python output, see the [`test_resources` directory](https://github.com/SaladDais/Lummao/tree/master/tests/test_resources).
+
 ## Setup
 
 LSL PyOptimizer is not distributed in a form that would allow easily using it as a library, it must be installed separately,
