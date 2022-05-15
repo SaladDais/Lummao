@@ -377,10 +377,10 @@ bool PythonVisitor::visit(LSLBinaryExpression *bin_expr) {
   if (op == '=') {
     auto *lvalue = (LSLLValueExpression *) lhs;
     auto *sym = lvalue->getSymbol();
-    // If we're directly parented to an ExpressionStatement we can just directly assign, no
-    // special song and dance. There are some other cases where we can do this but we'll worry
-    // about them later since they don't come up as often.
-    if (bin_expr->getParent()->getNodeSubType() == NODE_EXPRESSION_STATEMENT) {
+    // If our result isn't needed, this expression will be put in a statement context in Python.
+    // We can just directly assign, no special song and dance. There are some other cases where
+    // we can do this but we'll worry about them later since they don't come up as often.
+    if (!bin_expr->getResultNeeded()) {
       if (sym->getSubType() == SYM_GLOBAL)
         mStr << "self.";
       mStr << sym->getName() << " = ";
@@ -466,23 +466,40 @@ bool PythonVisitor::visit(LSLUnaryExpression *unary_expr) {
     auto *lvalue = (LSLLValueExpression *) child_expr;
     auto *sym = lvalue->getSymbol();
     bool global = sym->getSubType() == SYM_GLOBAL;
+    auto *member = lvalue->getMember();
 
-    mStr << "prepostincrdecr(";
-    if (global)
-      mStr << "self.__dict__";
-    else
-      mStr << "locals()";
-    mStr << ", \"" << sym->getName() << "\", ";
-    if (negative)
-      mStr << '-';
-    child_expr->getType()->getOneValue()->visit(this);
-    mStr << ", " << post << ", ";
-    if (auto *member = lvalue->getMember()) {
-      mStr << member_to_offset(member->getName());
+    if (unary_expr->getResultNeeded() || member) {
+      // this is in expression context, not statement context. We need to emulate the
+      // side-effects of ++foo and foo++ in an expression, since that construct doesn't exist
+      // in python.
+      mStr << "prepostincrdecr(";
+      if (global)
+        mStr << "self.__dict__";
+      else
+        mStr << "locals()";
+      mStr << ", \"" << sym->getName() << "\", ";
+      if (negative)
+        mStr << '-';
+      child_expr->getType()->getOneValue()->visit(this);
+      mStr << ", " << post << ", ";
+      if (auto *member = lvalue->getMember()) {
+        mStr << member_to_offset(member->getName());
+      } else {
+        mStr << "None";
+      }
+      mStr << ')';
     } else {
-      mStr << "None";
+      // in statement context, we can use the more idiomatic foo += 1 or foo -= 1.
+      if (sym->getSubType() == SYM_GLOBAL)
+        mStr << "self.";
+      mStr << sym->getName();
+      if (op == OP_POST_DECR || op == OP_PRE_DECR) {
+        mStr << " -= ";
+      } else {
+        mStr << " += ";
+      }
+      child_expr->getType()->getOneValue()->visit(this);
     }
-    mStr << ')';
     return false;
   }
 

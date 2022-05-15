@@ -26,11 +26,11 @@ class Script(BaseLSLScript):
 
     @with_goto
     def testPassed(self, description: str, actual: str, expected: str) -> None:
-        prepostincrdecr(self.__dict__, "gTestsPassed", 1, 0, None)
+        self.gTestsPassed += 1
 
     @with_goto
     def testFailed(self, description: str, actual: str, expected: str) -> None:
-        prepostincrdecr(self.__dict__, "gTestsFailed", 1, 0, None)
+        self.gTestsFailed += 1
         print(radd(")", radd(expected, radd(" expected ", radd(actual, radd(" (", radd(description, "FAILED!: ")))))))
         lslfuncs.llOwnerSay(typecast(rdiv(0, 0), str))
 
@@ -332,7 +332,7 @@ class Script(BaseLSLScript):
         i = 2
         self.ensureIntegerEqual("predec1", rbooland((req(1, prepostincrdecr(locals(), "i", -1, 0, None))), (req(1, i))), 1)
         i = 2
-        prepostincrdecr(locals(), "i", -1, 0, None)
+        i -= 1
         self.ensureIntegerEqual("predec2", i, 1)
         self.ensureFloatEqual("((float)2)", (float(2)), 2.0)
         self.ensureStringEqual("((string)2)", (typecast(2, str)), "2")
@@ -348,20 +348,20 @@ class Script(BaseLSLScript):
         self.ensureStringEqual("((string) [1,2.5,<1,2,3>])", (typecast([1, bin2float('2.500000', '00002040'), Vector((float(1), float(2), float(3)))], str)), "12.500000<1.000000, 2.000000, 3.000000>")
         i = 0
         while cond(rless(10, i)):
-            prepostincrdecr(locals(), "i", 1, 0, None)
+            i += 1
         self.ensureIntegerEqual("i = 0; while(i < 10) ++i", i, 10)
         i = 0
         while True:
-            prepostincrdecr(locals(), "i", 1, 0, None)
+            i += 1
             if not cond(rless(10, i)):
                 break
         self.ensureIntegerEqual("i = 0; do {++i;} while(i < 10);", i, 10)
-        (i := 0)
+        i = 0
         while True:
             if not cond(rless(10, i)):
                 break
             pass
-            prepostincrdecr(locals(), "i", 1, 0, None)
+            i += 1
         self.ensureIntegerEqual("for(i = 0; i < 10; ++i);", i, 10)
         i = 1
         goto .SkipAssign
