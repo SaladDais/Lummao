@@ -50,7 +50,7 @@ GPLv3, additionally including a copyright assignment to Sei Lisa, if desired.
 
 The output of the compiler necessarily links against the GPL-licensed runtime code from LSL-PyOptimizer for
 functionality, and LSL-PyOptimizer does not provide a library exception in its license.
-You should assume that any the LSL converted to Python by the compiler and any testcases you write exercising
+You should assume that any LSL converted to Python by the compiler and any testcases you write exercising
 them must _also_ be distributable under the GPL.
 
 In short: If or when you distribute your testcases, you must _also_ allow distribution of their direct
