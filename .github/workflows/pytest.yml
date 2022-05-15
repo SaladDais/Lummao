@@ -1,0 +1,66 @@
+name: Run Python Tests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.10"]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+        
+        sudo apt-get install cmake build-essential g++ flex bison
+        
+        git clone https://github.com/SaladDais/tailslide tailslide
+        pushd tailslide
+        mkdir build
+        pushd build
+        cmake ..
+        sudo make -j2 install
+        popd
+        popd
+        
+        mkdir build
+        pushd build
+        cmake ..
+        sudo make install
+        popd
+        
+        git clone https://github.com/Sei-Lisa/LSL-PyOptimizer.git pyoptimizer
+        echo "LSL_PYOPTIMIZER_PATH=$(pwd)/pyoptimizer" >> $GITHUB_ENV
+
+    - name: Run Flake8
+      run: |
+        flake8 .
+    - name: Test with pytest
+      # Tests are intentionally covered to detect broken tests.
+      run: |
+        pytest --cov=./lummao --cov=./tests --cov-report=xml
+#
+#    # Keep this in a workflow without any other secrets in it.
+#    - name: Upload coverage to Codecov
+#      uses: codecov/codecov-action@v1
+#      with:
+#        token: ${{ secrets.CODECOV_TOKEN }}
+#        files: ./coverage.xml
+#        directory: ./coverage/reports/
+#        flags: unittests
+#        env_vars: OS,PYTHON
+#        name: codecov-umbrella
+#        fail_ci_if_error: false
+#        path_to_write_report: ./coverage/codecov_report.txt
+#        verbose: false
