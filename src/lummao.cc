@@ -735,9 +735,9 @@ int main(int argc, char **argv) {
   logger->report();
 
   if (!logger->getErrors()) {
-    PythonVisitor mono_visitor;
-    script->visit(&mono_visitor);
-    std::string py_code {mono_visitor.mStr.str()};
+    PythonVisitor py_visitor;
+    script->visit(&py_visitor);
+    std::string py_code {py_visitor.mStr.str()};
     if (!strcmp(argv[2], "-")) {
       fprintf(stdout, "%s", py_code.c_str());
     } else {
