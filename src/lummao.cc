@@ -351,22 +351,13 @@ bool PythonVisitor::visit(LSLLValueExpression *lvalue) {
 void PythonVisitor::constructMutatedMember(LSLSymbol *sym, LSLIdentifier *member, LSLExpression *rhs) {
   // Member case is special. We actually need to construct a new version of the same
   // type of object with only the selected member swapped out, and then assign _that_.
-  mStr << PY_TYPE_NAMES[sym->getIType()] << "((";
-  int num_elems = sym->getIType() == LST_VECTOR ? 3 : 4;
   int member_offset = member_to_offset(member->getName());
-  for (int i=0; i<num_elems; ++i) {
-    if (i)
-      mStr << ", ";
-
-    if (i == member_offset) {
-      rhs->visit(this);
-    } else {
-      if (sym->getSubType() == SYM_GLOBAL)
-        mStr << "self.";
-      mStr << sym->getName() << '[' << i << ']';
-    }
-  }
-  mStr << "))";
+  mStr << "replace_coord_axis(";
+  if (sym->getSubType() == SYM_GLOBAL)
+    mStr << "self.";
+  mStr << sym->getName() << ", " << member_offset << ", ";
+  rhs->visit(this);
+  mStr << ')';
 }
 
 bool PythonVisitor::visit(LSLBinaryExpression *bin_expr) {

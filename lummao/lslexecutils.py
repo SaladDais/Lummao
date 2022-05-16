@@ -121,6 +121,16 @@ def boolnot(val):
     return int(not val)
 
 
+def replace_coord_axis(coord_val, member_idx, new_val):
+    new_coord = []
+    for i, axis_val in enumerate(coord_val):
+        if i == member_idx:
+            new_coord.append(new_val)
+        else:
+            new_coord.append(axis_val)
+    return coord_val.__class__(tuple(new_coord))
+
+
 def prepostincrdecr(sym_scope, sym_name, mod_amount, post, member_idx, frame):
     """
     ++i, --i, i++, i--, vec.x++, and so on.
@@ -135,13 +145,7 @@ def prepostincrdecr(sym_scope, sym_name, mod_amount, post, member_idx, frame):
     new_val = radd(orig_val, mod_amount)
 
     if member_idx:
-        new_coord = []
-        for i, axis_val in enumerate(sym_val):
-            if i == member_idx:
-                new_coord.append(new_val)
-            else:
-                new_coord.append(axis_val)
-        new_sym_val = sym_val.__class__(tuple(new_coord))
+        new_sym_val = replace_coord_axis(sym_val, member_idx, sym_val[member_idx] + mod_amount)
     else:
         new_sym_val = new_val
 
@@ -153,6 +157,8 @@ def prepostincrdecr(sym_scope, sym_name, mod_amount, post, member_idx, frame):
     # but that'd be annoying, wouldn't it. On second thought, maybe we should.
     ctypes.pythonapi.PyFrame_LocalsToFast(ctypes.py_object(frame), ctypes.c_int(0))
 
+    # Return the original val for post assignments, in either event this will return the value of
+    # the member itself if this was a vector or quat member assignment.
     if post:
         return orig_val
     return new_val

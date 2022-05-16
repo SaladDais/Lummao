@@ -405,14 +405,14 @@ class Script(BaseLSLScript):
         self.gRot = Quaternion((float(3), float(3), float(3), float(3)))
         self.ensureRotationEqual("-gRot = <-3,-3,-3,-3>", neg(self.gRot), Quaternion((float(-3), float(-3), float(-3), float(-3))))
         v: Vector = Vector((0.0, 0.0, 0.0))
-        v = Vector((float(3), v[1], v[2]))
+        v = replace_coord_axis(v, 0, float(3))
         self.ensureFloatEqual("v.x", v[0], float(3))
         q: Quaternion = Quaternion((0.0, 0.0, 0.0, 1.0))
-        q = Quaternion((q[0], q[1], q[2], float(5)))
+        q = replace_coord_axis(q, 3, float(5))
         self.ensureFloatEqual("q.s", q[3], float(5))
-        self.gVector = Vector((self.gVector[0], bin2float('17.500000', '00008c41'), self.gVector[2]))
+        self.gVector = replace_coord_axis(self.gVector, 1, bin2float('17.500000', '00008c41'))
         self.ensureFloatEqual("gVector.y = 17.5", self.gVector[1], bin2float('17.500000', '00008c41'))
-        self.gRot = Quaternion((self.gRot[0], self.gRot[1], bin2float('19.500000', '00009c41'), self.gRot[3]))
+        self.gRot = replace_coord_axis(self.gRot, 2, bin2float('19.500000', '00009c41'))
         self.ensureFloatEqual("gRot.z = 19.5", self.gRot[2], bin2float('19.500000', '00009c41'))
         l: list = typecast(5, list)
         l2: list = typecast(5, list)
@@ -428,9 +428,11 @@ class Script(BaseLSLScript):
             pass
         self.ensureListEqual("gCallOrder expected order", self.gCallOrder, [5, 4, 3, 2, 1, 0])
         self.ensureIntegerEqual("(gInteger = 5)", (assign(self.__dict__, "gInteger", 5)), 5)
-        self.ensureFloatEqual("(gVector.z = 6)", (assign(self.__dict__, "gVector", Vector((self.gVector[0], self.gVector[1], float(6))))[2]), float(6))
+        self.ensureFloatEqual("(gVector.z = 6)", (assign(self.__dict__, "gVector", replace_coord_axis(self.gVector, 2, float(6)))[2]), float(6))
         self.gVector = Vector((float(1), float(2), float(3)))
         self.ensureFloatEqual("++gVector.z", preincr(self.__dict__, "gVector", 2), float(4))
+        self.gVector = Vector((float(1), float(2), float(3)))
+        self.ensureFloatEqual("gVector.z++", postincr(self.__dict__, "gVector", 2), float(3))
 
     @with_goto
     def runTests(self) -> None:
