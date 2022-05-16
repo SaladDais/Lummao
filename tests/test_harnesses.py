@@ -16,7 +16,7 @@ class HarnessTestCase(unittest.TestCase):
     def test_run_conformance_suite(self):
         # If it doesn't raise then we count that as a success.
         self.script.edefaultstate_entry()
-        self.assertEqual(175, self.script.gTestsPassed)
+        self.assertEqual(178, self.script.gTestsPassed)
         self.assertEqual(0, self.script.gTestsFailed)
 
 

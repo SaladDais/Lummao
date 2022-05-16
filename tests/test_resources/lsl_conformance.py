@@ -427,6 +427,10 @@ class Script(BaseLSLScript):
         if cond(rboolor(1, rbooland(rbitor(rbitxor(rdiv(self.callOrderFunc(5), self.callOrderFunc(4)), self.callOrderFunc(3)), self.callOrderFunc(2)), rboolor(rmul(self.callOrderFunc(1), self.callOrderFunc(0)), 1)))):
             pass
         self.ensureListEqual("gCallOrder expected order", self.gCallOrder, [5, 4, 3, 2, 1, 0])
+        self.ensureIntegerEqual("(gInteger = 5)", (assign(self.__dict__, "gInteger", 5)), 5)
+        self.ensureFloatEqual("(gVector.z = 6)", (assign(self.__dict__, "gVector", Vector((self.gVector[0], self.gVector[1], float(6))))[2]), float(6))
+        self.gVector = Vector((float(1), float(2), float(3)))
+        self.ensureFloatEqual("++gVector.z", preincr(self.__dict__, "gVector", 2), float(4))
 
     @with_goto
     def runTests(self) -> None:

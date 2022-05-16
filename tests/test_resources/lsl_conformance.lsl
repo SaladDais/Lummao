@@ -642,6 +642,11 @@ tests()
     if (TRUE || callOrderFunc(0) * callOrderFunc(1) && callOrderFunc(2) | callOrderFunc(3) ^ callOrderFunc(4) / callOrderFunc(5) || TRUE) // $[E20007]
         ;
     ensureListEqual("gCallOrder expected order", gCallOrder, [5,4,3,2,1,0]);
+
+    ensureIntegerEqual("(gInteger = 5)", (gInteger = 5), 5);
+    ensureFloatEqual("(gVector.z = 6)", (gVector.z = 6), 6);
+    gVector = <1, 2, 3>;
+    ensureFloatEqual("++gVector.z", ++gVector.z, 4);
 }
 
 runTests()

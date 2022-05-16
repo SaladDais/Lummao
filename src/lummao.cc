@@ -407,6 +407,9 @@ bool PythonVisitor::visit(LSLBinaryExpression *bin_expr) {
         rhs->visit(this);
       }
       mStr << ')';
+      if (auto *member = lvalue->getMember()) {
+        mStr << '[' << member_to_offset(member->getName()) << ']';
+      }
     }
     return false;
   }
