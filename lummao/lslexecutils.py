@@ -22,7 +22,9 @@ import ctypes
 import struct
 import sys
 
-from lslopt import lslfuncs
+from lslopt import lslfuncs, lslcommon
+
+lslcommon.IsCalc = True
 
 
 def assign(obj_dict: dict, name: str, val):
