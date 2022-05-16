@@ -433,6 +433,11 @@ class Script(BaseLSLScript):
         self.ensureFloatEqual("++gVector.z", preincr(self.__dict__, "gVector", 2), float(4))
         self.gVector = Vector((float(1), float(2), float(3)))
         self.ensureFloatEqual("gVector.z++", postincr(self.__dict__, "gVector", 2), float(3))
+        self.ensureFloatEqual("(v.z = 6)", ((v := replace_coord_axis(v, 2, float(6)))[2]), float(6))
+        v = Vector((float(1), float(2), float(3)))
+        self.ensureFloatEqual("++v.z", preincr(locals(), "v", 2), float(4))
+        v = Vector((float(1), float(2), float(3)))
+        self.ensureFloatEqual("v.z++", postincr(locals(), "v", 2), float(3))
 
     @with_goto
     def runTests(self) -> None:

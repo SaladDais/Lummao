@@ -649,6 +649,12 @@ tests()
     ensureFloatEqual("++gVector.z", ++gVector.z, 4);
     gVector = <1, 2, 3>;
     ensureFloatEqual("gVector.z++", gVector.z++, 3);
+
+    ensureFloatEqual("(v.z = 6)", (v.z = 6), 6);
+    v = <1, 2, 3>;
+    ensureFloatEqual("++v.z", ++v.z, 4);
+    v = <1, 2, 3>;
+    ensureFloatEqual("v.z++", v.z++, 3);
 }
 
 runTests()
