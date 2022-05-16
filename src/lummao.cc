@@ -99,6 +99,11 @@ void PythonVisitor::writeChildrenSep(LSLASTNode *parent, const char *separator) 
 void PythonVisitor::writeFloat(float f_val) {
   if (std::nearbyint((double)f_val) == (double)f_val) {
     // if it's int-like then we can write it in decimal form without loss of precision
+    // but we need a special case for -0!
+    if (f_val == 0 && std::signbit(f_val)) {
+        mStr << "-0.0";
+        return;
+    }
     mStr << (int64_t)f_val << ".0";
     return;
   }

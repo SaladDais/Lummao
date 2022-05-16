@@ -25,6 +25,9 @@ class ConformanceTestCase(unittest.TestCase):
     def test_lsl_conformance_matches(self):
         self._assert_output_matches("lsl_conformance.lsl", "lsl_conformance.py")
 
+    def test_lsl_conformance2_matches(self):
+        self._assert_output_matches("lsl_conformance2.lsl", "lsl_conformance2.py")
+
 
 if __name__ == '__main__':
     unittest.main()

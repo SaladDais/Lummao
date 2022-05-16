@@ -21,6 +21,7 @@ import binascii
 import ctypes
 import struct
 import sys
+from typing import List, Sequence, Tuple, Any, Optional
 
 from lslopt import lslfuncs, lslcommon
 
@@ -189,5 +190,35 @@ class StateChangeException(Exception):
 
 
 class BaseLSLScript:
-    """TODO: some nice helper methods here"""
-    pass
+    def __init__(self):
+        self.current_state: str = "default"
+        self.next_state: Optional[str] = None
+        self.event_queue: List[Tuple[str, Sequence[Any]]] = [("state_entry", ())]
+
+    def queue_event(self, event_name: str, args: Sequence[Any]):
+        self.event_queue.append((event_name, args))
+
+    def _trigger_event_handler(self, name: str, *args):
+        # TODO: need extras for things like llDetectedKey(num)
+        func = getattr(self, f"e{self.current_state}{name}", None)
+        if func is not None:
+            func(*args)
+
+    def execute_one(self):
+        event, event_args = self.event_queue.pop(-1)
+        try:
+            self._trigger_event_handler(event, *event_args)
+            # TODO: Check this is correct, is changing state in state_exit possible?
+            if event == "state_exit":
+                # Need to queue a state_entry for the new state
+                self.current_state = self.next_state
+                self.event_queue.append(("state_entry", ()))
+
+        except StateChangeException as e:
+            self.next_state = e.new_state
+            self.event_queue.clear()
+            self.event_queue.append(("state_exit", ()))
+
+    def execute(self):
+        while self.event_queue:
+            self.execute_one()
