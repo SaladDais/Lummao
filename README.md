@@ -46,7 +46,7 @@ scripts to Python, so you can mock LSL library functions and use Python debugger
 
 ## License
 
-GPLv3, additionally including a copyright assignment to Sei Lisa, if desired.
+GPLv3
 
 ### Licensing Clarifications
 
