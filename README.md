@@ -30,7 +30,7 @@ with an environment variable pointing to its location so Lummao can find it.
 
 If you've ever written a sufficiently complicated system in LSL, you know how annoying it is to debug your scripts
 or be sure if they're even correct. Clearly the sanest way to bring sanity to your workflow is to convert your LSL
-scripts to Python, so you can mock LSL library functions and use Python debuggers, hence the name.
+scripts to Python, so you can mock LSL library functions and use Python debuggers. Hence the name "Lummao".
 
 ## TODO
 
