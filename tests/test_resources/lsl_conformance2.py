@@ -146,6 +146,7 @@ class Script(BaseLSLScript):
     @with_goto
     def tests(self) -> None:
         self.ensureTrue("gVisitedStateTest ", self.gVisitedStateTest)
+        self.ensureFloatExactEqual("1.4e-45 == (float)\"1.4e-45\"", bin2float('0.000000', '01000000'), typecast("1.4e-45", float))
         self.testArgumentAccessor(Vector((float(0), float(0), float(0))))
         self.testLocalAccessor()
         self.testGlobalAccessor()
@@ -323,6 +324,7 @@ class Script(BaseLSLScript):
         self.ensureStringEqual("llDumpList2String([-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>], \" ~ \")", lslfuncs.llDumpList2String([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))], " ~ "), "-0.000000 ~ <-0.000000, 0.000000, -0.000000> ~ <-0.000000, 0.000000, -0.000000, 0.000000>")
         self.ensureStringEqual("(string)[-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>]", typecast([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))], str), "-0.000000<-0.000000, 0.000000, -0.000000><-0.000000, 0.000000, -0.000000, 0.000000>")
         self.ensureStringEqual("llList2String([-0.0], 0)", lslfuncs.llList2String([-0.0], 0), "-0.000000")
+        self.ensureStringEqual("(string)(float)\"-0.0\"", typecast(typecast("-0.0", float), str), "-0.000000")
         self.ensureStringEqual("(string)(vector)\"<-0.0,0.0,-0.0>\"", typecast(typecast("<-0.0,0.0,-0.0>", Vector), str), "<-0.00000, 0.00000, -0.00000>")
         self.ensureStringEqual("(string)(rotation)\"<-0.0,0.0,-0.0,0.0>\"", typecast(typecast("<-0.0,0.0,-0.0,0.0>", Quaternion), str), "<-0.00000, 0.00000, -0.00000, 0.00000>")
         self.ensureKeyEqual("testReturnKey() == NULL_KEY", self.testReturnKey(), typecast("00000000-0000-0000-0000-000000000000", Key))

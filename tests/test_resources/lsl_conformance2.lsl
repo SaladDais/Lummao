@@ -207,8 +207,7 @@ tests()
     // Ensure that multiple states containing the same handler work (SVC-1372 Regression)
     ensureTrue("gVisitedStateTest ", gVisitedStateTest);
 
-    // XFAIL!
-    // ensureFloatExactEqual("1.4e-45 == (float)\"1.4e-45\"", 1.4e-45, (float)"1.4e-45");
+    ensureFloatExactEqual("1.4e-45 == (float)\"1.4e-45\"", 1.4e-45, (float)"1.4e-45");
 
     // Managed pointer save/restore tests.
     testArgumentAccessor(<0,0,0>);
@@ -412,8 +411,7 @@ tests()
 
     ensureStringEqual("llList2String([-0.0], 0)", llList2String([-0.0], 0), "-0.000000");
 
-    // XFAIL!
-    // ensureStringEqual("(string)(float)\"-0.0\"", (string)((float)"-0.0"), "-0.000000");
+    ensureStringEqual("(string)(float)\"-0.0\"", (string)((float)"-0.0"), "-0.000000");
     ensureStringEqual("(string)(vector)\"<-0.0,0.0,-0.0>\"",
         (string)((vector)"<-0.0,0.0,-0.0>"), "<-0.00000, 0.00000, -0.00000>");
     ensureStringEqual("(string)(rotation)\"<-0.0,0.0,-0.0,0.0>\"",
