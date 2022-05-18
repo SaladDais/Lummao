@@ -21,7 +21,6 @@ class HarnessTestCase(unittest.TestCase):
         script = lsl_conformance2.Script()
         # Handles the internal state changes and whatnot
         script.execute()
-        # TODO: should be 69 but we have 2 XFAILs commented out for the moment
         self.assertEqual(69, script.gTestsPassed)
         self.assertEqual(0, script.gTestsFailed)
 
