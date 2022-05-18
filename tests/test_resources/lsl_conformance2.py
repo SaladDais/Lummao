@@ -321,7 +321,7 @@ class Script(BaseLSLScript):
         self.ensureStringEqual("(string)<-0.0,0.0,-0.0>", typecast(Vector((-0.0, 0.0, -0.0)), str), "<-0.00000, 0.00000, -0.00000>")
         self.ensureStringEqual("(string)<-0.0,0.0,-0.0,0.0>", typecast(Quaternion((-0.0, 0.0, -0.0, 0.0)), str), "<-0.00000, 0.00000, -0.00000, 0.00000>")
         self.ensureStringEqual("llList2CSV([-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>])", lslfuncs.llList2CSV([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))]), "-0.000000, <-0.000000, 0.000000, -0.000000>, <-0.000000, 0.000000, -0.000000, 0.000000>")
-        self.ensureStringEqual("llDumpList2String([-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>], \" ~ \")", lslfuncs.llDumpList2String([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))], " ~ "), "-0.000000 ~ <-0.000000, 0.000000, -0.000000> ~ <-0.000000, 0.000000, -0.000000, 0.000000>")
+        self.ensureStringEqual("llDumpList2String([-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>], \" ~ \")", lslfuncs.llDumpList2String([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))], " ~ "), "0.000000 ~ <0.000000, 0.000000, 0.000000> ~ <0.000000, 0.000000, 0.000000, 0.000000>")
         self.ensureStringEqual("(string)[-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>]", typecast([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))], str), "-0.000000<-0.000000, 0.000000, -0.000000><-0.000000, 0.000000, -0.000000, 0.000000>")
         self.ensureStringEqual("llList2String([-0.0], 0)", lslfuncs.llList2String([-0.0], 0), "-0.000000")
         self.ensureStringEqual("(string)(float)\"-0.0\"", typecast(typecast("-0.0", float), str), "-0.000000")
