@@ -4,6 +4,7 @@
 import dis
 import struct
 import array
+import sys
 import types
 import functools
 import weakref
@@ -44,6 +45,7 @@ class _Bytecode:
         self.has_setup_with = 'SETUP_WITH' in dis.opmap
         self.has_setup_except = 'SETUP_EXCEPT' in dis.opmap
         self.has_begin_finally = 'BEGIN_FINALLY' in dis.opmap
+        self.has_with_except = 'WITH_EXCEPT_START' in dis.opmap
 
         try:
             import __pypy__
@@ -272,7 +274,10 @@ def _find_labels_and_gotos(code):
         elif opname1 in ('SETUP_LOOP', 'FOR_ITER',
                          'SETUP_EXCEPT', 'SETUP_FINALLY',
                          'SETUP_WITH', 'SETUP_ASYNC_WITH'):
-            block_counter = push_block(opname1, endoffset1 + oparg1)
+            if opname1 == 'SETUP_FINALLY' and sys.version_info >= (3, 9):
+                raise NotImplementedError("finally semantics not supported in 3.9+")
+            # Make sure to convert the argument to the real offset using the given version's jump units
+            block_counter = push_block(opname1, endoffset1 + (oparg1 * _BYTECODE.jump_unit))
 
         elif opname1 == 'POP_EXCEPT':
             last_block = pop_block_of_type('<EXCEPT>')
@@ -288,6 +293,11 @@ def _find_labels_and_gotos(code):
             else:
                 # python 2.6 - finally was actually with
                 replace_block(last_block, ('SETUP_WITH',) + last_block[1:])
+
+        elif opname1 == 'WITH_EXCEPT_START':
+            # Python 3.9+
+            # https://github.com/python/cpython/issues/77568
+            raise NotImplementedError("with/finally semantics not supported in Python 3.9+")
 
         if opname1 in ('JUMP_ABSOLUTE', 'JUMP_FORWARD'):
             dead = True

@@ -194,51 +194,51 @@ class Script(BaseLSLScript):
         s = typecast(k, str)
         self.ensureStringEqual("k = NULL_KEY; string s; s = k;", s, "00000000-0000-0000-0000-000000000000")
         v: Vector = Vector((float(1), float(1), float(1)))
-        while cond(v):
+        while cond(v) == True:
             v = Vector((0.0, 0.0, 0.0))
         self.ensureVectorEqual("while (v) { v = ZERO_VECTOR; }", v, Vector((0.0, 0.0, 0.0)))
         v = Vector((float(2), float(2), float(2)))
-        while True:
+        while True == True:
             v = Vector((0.0, 0.0, 0.0))
             if not cond(v):
                 break
         self.ensureVectorEqual("v = <2,2,2>; do { v = ZERO_VECTOR } while (v);", v, Vector((0.0, 0.0, 0.0)))
         v = Vector((float(3), float(3), float(3)))
-        while True:
+        while True == True:
             if not cond(v):
                 break
             pass
             v = Vector((0.0, 0.0, 0.0))
         self.ensureVectorEqual("for (v = <3,3,3>;v;v=ZERO_VECTOR) {}", v, Vector((0.0, 0.0, 0.0)))
         k = typecast("7c42811e-229f-4500-b6d7-2c37324ff816", Key)
-        while cond(k):
+        while cond(k) == True:
             k = typecast("00000000-0000-0000-0000-000000000000", Key)
         self.ensureKeyEqual("while (k) { k = NULL_KEY; }", k, typecast("00000000-0000-0000-0000-000000000000", Key))
         k = typecast("7c42811e-229f-4500-b6d7-2c37324ff816", Key)
-        while True:
+        while True == True:
             k = typecast("00000000-0000-0000-0000-000000000000", Key)
             if not cond(k):
                 break
         self.ensureKeyEqual("k = \"7c42811e-229f-4500-b6d7-2c37324ff816\"; do { k = NULL_KEY } while (k);", k, typecast("00000000-0000-0000-0000-000000000000", Key))
         k = typecast("7c42811e-229f-4500-b6d7-2c37324ff816", Key)
-        while True:
+        while True == True:
             if not cond(k):
                 break
             pass
             k = typecast("00000000-0000-0000-0000-000000000000", Key)
         self.ensureKeyEqual("for (k = \"7c42811e-229f-4500-b6d7-2c37324ff816\";k;k=NULL_KEY) {}", k, typecast("00000000-0000-0000-0000-000000000000", Key))
         q: Quaternion = Quaternion((float(1), float(1), float(1), float(1)))
-        while cond(q):
+        while cond(q) == True:
             q = Quaternion((0.0, 0.0, 0.0, 1.0))
         self.ensureRotationEqual("while (q) { q = ZERO_ROTATION; }", q, Quaternion((0.0, 0.0, 0.0, 1.0)))
         q = Quaternion((float(2), float(2), float(2), float(2)))
-        while True:
+        while True == True:
             q = Quaternion((0.0, 0.0, 0.0, 1.0))
             if not cond(q):
                 break
         self.ensureRotationEqual("q = <2,2,2>; do { v = ZERO_ROTATION } while (q);", q, Quaternion((0.0, 0.0, 0.0, 1.0)))
         q = Quaternion((float(3), float(3), float(3), float(3)))
-        while True:
+        while True == True:
             if not cond(q):
                 break
             pass
@@ -246,57 +246,57 @@ class Script(BaseLSLScript):
         self.ensureRotationEqual("for (q = <3,3,3,3>;q;q=ZERO_ROTATION) {}", q, Quaternion((0.0, 0.0, 0.0, 1.0)))
         l = [1]
         l = [2]
-        while True:
+        while True == True:
             l = []
             if not cond(l):
                 break
         self.ensureListEqual("l = [2]; do { v = [] } while (l);", l, [])
         s = "1!"
-        while cond(s):
+        while cond(s) == True:
             s = ""
         self.ensureStringEqual("while (s) { s = \"\"; }", s, "")
         s = "2!"
-        while True:
+        while True == True:
             s = ""
             if not cond(s):
                 break
         self.ensureStringEqual("s = \"2!\"; do { s = \"\" } while (s);", s, "")
         s = "3!"
-        while True:
+        while True == True:
             if not cond(s):
                 break
             pass
             s = ""
         self.ensureStringEqual("for (s = \"3!\";s;s=\"\") {}", s, "")
         i: int = 1
-        while cond(i):
+        while cond(i) == True:
             i = 0
         self.ensureIntegerEqual("while (i) { i = 0; }", i, 0)
         i = 2
-        while True:
+        while True == True:
             i = 0
             if not cond(i):
                 break
         self.ensureIntegerEqual("i = 2; do { i = 0 } while (i);", i, 0)
         i = 3
-        while True:
+        while True == True:
             if not cond(i):
                 break
             pass
             i = 0
         self.ensureIntegerEqual("for (i = 3;i;i=0) {}", i, 0)
         f: float = float(1)
-        while cond(f):
+        while cond(f) == True:
             f = float(0)
         self.ensureFloatEqual("while (f) { f = 0; }", f, float(0))
         f = float(2)
-        while True:
+        while True == True:
             f = float(0)
             if not cond(f):
                 break
         self.ensureFloatEqual("f = 2; do { f = 0 } while (f);", f, float(0))
         f = float(3)
-        while True:
+        while True == True:
             if not cond(f):
                 break
             pass

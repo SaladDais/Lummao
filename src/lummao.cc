@@ -607,7 +607,10 @@ bool PythonVisitor::visit(LSLForStatement *for_stmt) {
   // all loops are represented as `while`s in Python for consistency
   // since LSL's loop semantics are different from Python's
   doTabs();
-  mStr << "while True:\n";
+  // The `True == True` is to force pessimization of Python's dead code eliminator,
+  // otherwise it can turn the loop into an unconditional jump with everything after
+  // the loop eliminated, not aware of the `goto` semantics we've added in for jumps.
+  mStr << "while True == True:\n";
   {
     ScopedTabSetter tab_setter_1(this, mTabs + 1);
 
@@ -635,7 +638,7 @@ bool PythonVisitor::visit(LSLWhileStatement *while_stmt) {
   doTabs();
   mStr << "while ";
   while_stmt->getCheckExpr()->visit(this);
-  mStr << ":\n";
+  mStr << " == True:\n";
   {
     ScopedTabSetter tab_setter_1(this, mTabs + 1);
     while_stmt->getBody()->visit(this);
@@ -645,7 +648,7 @@ bool PythonVisitor::visit(LSLWhileStatement *while_stmt) {
 
 bool PythonVisitor::visit(LSLDoStatement *do_stmt) {
   doTabs();
-  mStr << "while True:\n";
+  mStr << "while True == True:\n";
   {
     ScopedTabSetter tab_setter_1(this, mTabs + 1);
     do_stmt->getBody()->visit(this);

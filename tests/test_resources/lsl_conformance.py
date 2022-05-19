@@ -347,17 +347,17 @@ class Script(BaseLSLScript):
         self.ensureStringEqual("((string) <1,2,3,4>)", (typecast(Quaternion((float(1), float(2), float(3), float(4))), str)), "<1.00000, 2.00000, 3.00000, 4.00000>")
         self.ensureStringEqual("((string) [1,2.5,<1,2,3>])", (typecast([1, bin2float('2.500000', '00002040'), Vector((float(1), float(2), float(3)))], str)), "12.500000<1.000000, 2.000000, 3.000000>")
         i = 0
-        while cond(rless(10, i)):
+        while cond(rless(10, i)) == True:
             i += 1
         self.ensureIntegerEqual("i = 0; while(i < 10) ++i", i, 10)
         i = 0
-        while True:
+        while True == True:
             i += 1
             if not cond(rless(10, i)):
                 break
         self.ensureIntegerEqual("i = 0; do {++i;} while(i < 10);", i, 10)
         i = 0
-        while True:
+        while True == True:
             if not cond(rless(10, i)):
                 break
             pass
