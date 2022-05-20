@@ -15,6 +15,7 @@ class PythonVisitor : public ASTVisitor {
   virtual bool visit(LSLGlobalVariable *glob_var);
   virtual bool visit(LSLGlobalFunction *glob_func);
   virtual bool visit(LSLEventHandler *event_handler);
+  void visitFuncLike(LSLASTNode *func_like, LSLASTNode *body);
 
   virtual bool visit(LSLIntegerConstant *int_const);
   virtual bool visit(LSLFloatConstant *float_const);
@@ -48,7 +49,12 @@ class PythonVisitor : public ASTVisitor {
   virtual bool visit(LSLJumpStatement *jump_stmt);
   virtual bool visit(LSLLabel *label_stmt);
   virtual bool visit(LSLReturnStatement *return_stmt);
+  void writeReturn(LSLExpression *ret_expr);
   virtual bool visit(LSLStateStatement *state_stmt);
+
+  int _mFuncPreludeTabs = 0;
+  std::stringstream _mFuncPreludeStr;
+  LSLSymbol *_mFuncSym = nullptr;
 
   public:
   std::stringstream mStr;
@@ -70,6 +76,18 @@ static const char * const PY_TYPE_NAMES[LST_MAX] {
   "Vector",
   "Quaternion",
   "list",
+  "<ERROR>"
+};
+
+static const char * const PY_PRELUDE_TYPE_NAMES[LST_MAX] {
+  "None",
+  "int",
+  "float",
+  "Optional[str]",
+  "Optional[Key]",
+  "Vector",
+  "Quaternion",
+  "Optional[list]",
   "<ERROR>"
 };
 
@@ -186,35 +204,56 @@ bool PythonVisitor::visit(LSLGlobalVariable *glob_var) {
 
 bool PythonVisitor::visit(LSLGlobalFunction *glob_func) {
   auto *id = glob_func->getIdentifier();
-  doTabs();
-  mStr << "@with_goto\n";
+  auto *func_sym = glob_func->getSymbol();
+  if (func_sym->getHasJumps()) {
+    doTabs();
+    mStr << "@with_goto\n";
+  }
   doTabs();
   mStr << "def " << id->getName() << "(self";
   for (auto *arg : *glob_func->getArguments()) {
     mStr << ", " << arg->getName() << ": " << PY_TYPE_NAMES[arg->getIType()];
   }
   mStr << ") -> " << PY_TYPE_NAMES[id->getIType()] << ":\n";
-  ScopedTabSetter tab_setter(this, mTabs + 1);
-  glob_func->getStatements()->visit(this);
-  mStr << '\n';
+  visitFuncLike(glob_func, glob_func->getStatements());
   return false;
 }
 
 bool PythonVisitor::visit(LSLEventHandler *event_handler) {
-  auto *id = event_handler->getIdentifier();
   auto *state_sym = event_handler->getParent()->getParent()->getSymbol();
-  doTabs();
-  mStr << "@with_goto\n";
+  auto *id = event_handler->getIdentifier();
+  auto *func_sym = event_handler->getSymbol();
+  if (func_sym->getHasJumps()) {
+    doTabs();
+    mStr << "@with_goto\n";
+  }
   doTabs();
   mStr << "def e" << state_sym->getName() << id->getName() << "(self";
   for (auto *arg : *event_handler->getArguments()) {
     mStr << ", " << arg->getName() << ": " << PY_TYPE_NAMES[arg->getIType()];
   }
   mStr << ") -> " << PY_TYPE_NAMES[id->getIType()] << ":\n";
-  ScopedTabSetter tab_setter(this, mTabs + 1);
-  event_handler->getStatements()->visit(this);
-  mStr << '\n';
+  visitFuncLike(event_handler, event_handler->getStatements());
   return false;
+}
+
+void PythonVisitor::visitFuncLike(LSLASTNode *func_like, LSLASTNode *body) {
+  ScopedTabSetter tab_setter(this, mTabs + 1);
+  _mFuncPreludeTabs = mTabs;
+  _mFuncSym = func_like->getSymbol();
+
+  std::stringstream orig_stream(std::move(mStr));
+  mStr = std::stringstream();
+  body->visit(this);
+  std::string func_body_str {mStr.str()};
+  mStr = std::move(orig_stream);
+
+  mStr << _mFuncPreludeStr.str();
+  mStr << func_body_str;
+
+  _mFuncPreludeStr.str("");
+  _mFuncPreludeStr.clear();
+  mStr << '\n';
 }
 
 bool PythonVisitor::visit(LSLIntegerConstant *int_const) {
@@ -567,7 +606,51 @@ bool PythonVisitor::visit(LSLExpressionStatement *expr_stmt) {
 bool PythonVisitor::visit(LSLDeclaration *decl_stmt) {
   doTabs();
   auto *sym = decl_stmt->getSymbol();
-  mStr << sym->getName() << ": " << PY_TYPE_NAMES[sym->getIType()] << " = ";
+
+  if (_mFuncSym->getHasUnstructuredJumps()) {
+    // get down to our nasty declaration hoisting business.
+    // the declaration will be added to the prelude stringstream
+    for(int i=0; i<_mFuncPreludeTabs; ++i) {
+      _mFuncPreludeStr << "    ";
+    }
+    // We need a "pre-initialization" to handle the weirdness that comes with jumping over declarations
+    // some variables have different values before they're initialized by the declaration statement!
+    // this is only an issue if we have unstructured jumps, which could have jumped over a declaration
+    // node that would have done an assignment. No unstructured jumps means no use-before-initialization
+    // means no need to hoist. At least as of CPython 3.11 beta, these "unnecessary" declarations aren't
+    // eliminated by the peepholer.
+    _mFuncPreludeStr << sym->getName() << ": " << PY_PRELUDE_TYPE_NAMES[sym->getIType()] << " = ";
+    switch(sym->getIType()) {
+      case LST_INTEGER:
+        _mFuncPreludeStr << "0";
+        break;
+      case LST_FLOATINGPOINT:
+        _mFuncPreludeStr << "0.0";
+        break;
+      case LST_STRING:
+      case LST_KEY:
+      case LST_LIST:
+        _mFuncPreludeStr << "None";
+        break;
+      case LST_VECTOR:
+        _mFuncPreludeStr << "Vector((0.0, 0.0, 0.0))";
+        break;
+      case LST_QUATERNION:
+        // NOT 0.0, 0.0, 0.0, 1.0!
+        _mFuncPreludeStr << "Quaternion((0.0, 0.0, 0.0, 0.0))";
+        break;
+      default:
+        assert(0);
+    }
+    _mFuncPreludeStr << '\n';
+
+    // now handle the assignment at the actual declaration node
+    mStr << sym->getName() << " = ";
+  } else {
+    // don't need hoisting, do the declaration inline
+    mStr << sym->getName() << ": " << PY_TYPE_NAMES[sym->getIType()] << " = ";
+  }
+
   LSLASTNode *initializer = decl_stmt->getInitializer();
   if (!initializer) {
     initializer = sym->getType()->getDefaultValue();
@@ -682,15 +765,33 @@ bool PythonVisitor::visit(LSLLabel *label_stmt) {
 }
 
 bool PythonVisitor::visit(LSLReturnStatement *return_stmt) {
+  if (_mFuncSym->getHasJumps()) {
+    // we need to do extra work to make sure code past this return doesn't get eliminated
+    // by Python's dead code eliminator. Putting the return in a conditional branch that
+    // the compiler doesn't reason about statically is sufficient for that.
+    // necessary even with only "structured" jumps because we can't actually use the `continue`
+    // keyword due to differing looping constructs between Python and LSL.
+    // Technically there are ways we could represent loops that would allows us to use the
+    // `continue` keyword, but they'd be much, much uglier than this dumb little hack.
+    doTabs();
+    mStr << "if True == True:\n";
+    ScopedTabSetter tab_setter(this, mTabs + 1);
+    writeReturn(return_stmt->getExpr());
+  } else {
+    writeReturn(return_stmt->getExpr());
+  }
+  return false;
+}
+
+void PythonVisitor::writeReturn(LSLExpression *ret_expr) {
   doTabs();
-  if (auto *expr = return_stmt->getExpr()) {
+  if (ret_expr) {
     mStr << "return ";
-    expr->visit(this);
+    ret_expr->visit(this);
   } else {
     mStr << "return";
   }
   mStr << '\n';
-  return false;
 }
 
 bool PythonVisitor::visit(LSLStateStatement *state_stmt) {
@@ -731,7 +832,7 @@ int main(int argc, char **argv) {
     script->determineTypes();
     script->recalculateReferenceData();
     script->propagateValues();
-    script->checkBestPractices();
+    script->finalPass();
 
     if (!logger->getErrors()) {
       script->validateGlobals(true);

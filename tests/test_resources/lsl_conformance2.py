@@ -22,38 +22,32 @@ class Script(BaseLSLScript):
         self.chat = 1
         self.gVector = Vector((0.0, 0.0, 0.0))
 
-    @with_goto
     def testPassed(self, description: str, actual: str, expected: str) -> None:
         self.gTestsPassed += 1
 
-    @with_goto
     def testFailed(self, description: str, actual: str, expected: str) -> None:
         self.gTestsFailed += 1
         print(radd(")", radd(expected, radd(" expected ", radd(actual, radd(" (", radd(description, "FAILED!: ")))))))
         lslfuncs.llOwnerSay(typecast(rdiv(0, 0), str))
 
-    @with_goto
     def ensureTrue(self, description: str, actual: int) -> None:
         if cond(actual):
             self.testPassed(description, typecast(actual, str), typecast(1, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(1, str))
 
-    @with_goto
     def ensureFalse(self, description: str, actual: int) -> None:
         if cond(actual):
             self.testFailed(description, typecast(actual, str), typecast(0, str))
         else:
             self.testPassed(description, typecast(actual, str), typecast(0, str))
 
-    @with_goto
     def ensureIntegerEqual(self, description: str, actual: int, expected: int) -> None:
         if cond(req(expected, actual)):
             self.testPassed(description, typecast(actual, str), typecast(expected, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
-    @with_goto
     def floatEqual(self, actual: float, expected: float) -> int:
         error: float = lslfuncs.llFabs(rsub(actual, expected))
         epsilon: float = bin2float('0.001000', '6f12833a')
@@ -62,64 +56,54 @@ class Script(BaseLSLScript):
             return 0
         return 1
 
-    @with_goto
     def ensureFloatEqual(self, description: str, actual: float, expected: float) -> None:
         if cond(self.floatEqual(actual, expected)):
             self.testPassed(description, typecast(actual, str), typecast(expected, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
-    @with_goto
     def ensureFloatExactEqual(self, description: str, actual: float, expected: float) -> None:
         if cond(req(expected, actual)):
             self.testPassed(description, typecast(actual, str), typecast(expected, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
-    @with_goto
     def ensureStringEqual(self, description: str, actual: str, expected: str) -> None:
         if cond(req(expected, actual)):
             self.testPassed(description, typecast(actual, str), typecast(expected, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
-    @with_goto
     def ensureKeyEqual(self, description: str, actual: Key, expected: Key) -> None:
         if cond(req(expected, actual)):
             self.testPassed(description, typecast(actual, str), typecast(expected, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
-    @with_goto
     def ensureVectorEqual(self, description: str, actual: Vector, expected: Vector) -> None:
         if cond(rbooland(self.floatEqual(actual[2], expected[2]), rbooland(self.floatEqual(actual[1], expected[1]), self.floatEqual(actual[0], expected[0])))):
             self.testPassed(description, typecast(actual, str), typecast(expected, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
-    @with_goto
     def ensureRotationEqual(self, description: str, actual: Quaternion, expected: Quaternion) -> None:
         if cond(rbooland(self.floatEqual(actual[3], expected[3]), rbooland(self.floatEqual(actual[2], expected[2]), rbooland(self.floatEqual(actual[1], expected[1]), self.floatEqual(actual[0], expected[0]))))):
             self.testPassed(description, typecast(actual, str), typecast(expected, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
-    @with_goto
     def ensureListEqual(self, description: str, actual: list, expected: list) -> None:
         if cond(req(expected, actual)):
             self.testPassed(description, typecast(actual, str), typecast(expected, str))
         else:
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
-    @with_goto
     def testReturnFloat(self) -> float:
         return 1.0
 
-    @with_goto
     def testReturnKey(self) -> Key:
         return typecast("00000000-0000-0000-0000-000000000000", Key)
 
-    @with_goto
     def testArgumentAccessor(self, v: Vector) -> None:
         v = Vector((float(0), float(0), float(0)))
         v = replace_coord_axis(v, 0, self.testReturnFloat())
@@ -127,7 +111,6 @@ class Script(BaseLSLScript):
         v = replace_coord_axis(v, 2, self.testReturnFloat())
         self.ensureVectorEqual("testArgumentAccessor", v, Vector((float(1), float(1), float(1))))
 
-    @with_goto
     def testLocalAccessor(self) -> None:
         v: Vector = Vector((float(0), float(0), float(0)))
         v = replace_coord_axis(v, 0, self.testReturnFloat())
@@ -135,7 +118,6 @@ class Script(BaseLSLScript):
         v = replace_coord_axis(v, 2, self.testReturnFloat())
         self.ensureVectorEqual("testLocalAccessor", v, Vector((float(1), float(1), float(1))))
 
-    @with_goto
     def testGlobalAccessor(self) -> None:
         self.gVector = Vector((float(0), float(0), float(0)))
         self.gVector = replace_coord_axis(self.gVector, 0, self.testReturnFloat())
@@ -143,7 +125,6 @@ class Script(BaseLSLScript):
         self.gVector = replace_coord_axis(self.gVector, 2, self.testReturnFloat())
         self.ensureVectorEqual("testGlobalAccessor", self.gVector, Vector((float(1), float(1), float(1))))
 
-    @with_goto
     def tests(self) -> None:
         self.ensureTrue("gVisitedStateTest ", self.gVisitedStateTest)
         self.ensureFloatExactEqual("1.4e-45 == (float)\"1.4e-45\"", bin2float('0.000000', '01000000'), typecast("1.4e-45", float))
@@ -338,7 +319,6 @@ class Script(BaseLSLScript):
         self.ensureStringEqual("string defaultString;", defaultString, "")
         self.ensureIntegerEqual("chat == TRUE", self.chat, 1)
 
-    @with_goto
     def runTests(self) -> None:
         self.gTestsPassed = 0
         self.gTestsFailed = 0
@@ -346,21 +326,17 @@ class Script(BaseLSLScript):
         self.gVisitedStateTest = 0
         print("Test succeeded")
 
-    @with_goto
     def edefaultstate_entry(self) -> None:
         raise StateChangeException('StateTest')
 
-    @with_goto
     def edefaulttouch_start(self, total_number: int) -> None:
         raise StateChangeException('StateTest')
 
-    @with_goto
     def eStateTeststate_entry(self) -> None:
         self.ensureFalse("gVisitedStateTest", self.gVisitedStateTest)
         self.gVisitedStateTest = 1
         self.runTests()
 
-    @with_goto
     def eStateTesttouch_start(self, total_number: int) -> None:
         raise StateChangeException('default')
 
