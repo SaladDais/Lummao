@@ -28,7 +28,7 @@ class Script(BaseLSLScript):
     def testFailed(self, description: str, actual: str, expected: str) -> None:
         self.gTestsFailed += 1
         print(radd(")", radd(expected, radd(" expected ", radd(actual, radd(" (", radd(description, "FAILED!: ")))))))
-        lslfuncs.llOwnerSay(typecast(rdiv(0, 0), str))
+        self.builtin_funcs.llOwnerSay(typecast(rdiv(0, 0), str))
 
     def ensureTrue(self, description: str, actual: int) -> None:
         if cond(actual):
@@ -49,10 +49,10 @@ class Script(BaseLSLScript):
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
     def floatEqual(self, actual: float, expected: float) -> int:
-        error: float = lslfuncs.llFabs(rsub(actual, expected))
+        error: float = self.builtin_funcs.llFabs(rsub(actual, expected))
         epsilon: float = bin2float('0.001000', '6f12833a')
         if cond(rgreater(epsilon, error)):
-            lslfuncs.llSay(0, radd(typecast(error, str), "Float equality delta "))
+            self.builtin_funcs.llSay(0, radd(typecast(error, str), "Float equality delta "))
             return 0
         return 1
 
@@ -301,10 +301,10 @@ class Script(BaseLSLScript):
         self.ensureStringEqual("(string)-0.0", typecast(-0.0, str), "-0.000000")
         self.ensureStringEqual("(string)<-0.0,0.0,-0.0>", typecast(Vector((-0.0, 0.0, -0.0)), str), "<-0.00000, 0.00000, -0.00000>")
         self.ensureStringEqual("(string)<-0.0,0.0,-0.0,0.0>", typecast(Quaternion((-0.0, 0.0, -0.0, 0.0)), str), "<-0.00000, 0.00000, -0.00000, 0.00000>")
-        self.ensureStringEqual("llList2CSV([-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>])", lslfuncs.llList2CSV([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))]), "-0.000000, <-0.000000, 0.000000, -0.000000>, <-0.000000, 0.000000, -0.000000, 0.000000>")
-        self.ensureStringEqual("llDumpList2String([-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>], \" ~ \")", lslfuncs.llDumpList2String([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))], " ~ "), "0.000000 ~ <0.000000, 0.000000, 0.000000> ~ <0.000000, 0.000000, 0.000000, 0.000000>")
+        self.ensureStringEqual("llList2CSV([-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>])", self.builtin_funcs.llList2CSV([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))]), "-0.000000, <-0.000000, 0.000000, -0.000000>, <-0.000000, 0.000000, -0.000000, 0.000000>")
+        self.ensureStringEqual("llDumpList2String([-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>], \" ~ \")", self.builtin_funcs.llDumpList2String([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))], " ~ "), "0.000000 ~ <0.000000, 0.000000, 0.000000> ~ <0.000000, 0.000000, 0.000000, 0.000000>")
         self.ensureStringEqual("(string)[-0.0, <-0.0,0.0,-0.0>, <-0.0,0.0,-0.0,0.0>]", typecast([-0.0, Vector((-0.0, 0.0, -0.0)), Quaternion((-0.0, 0.0, -0.0, 0.0))], str), "-0.000000<-0.000000, 0.000000, -0.000000><-0.000000, 0.000000, -0.000000, 0.000000>")
-        self.ensureStringEqual("llList2String([-0.0], 0)", lslfuncs.llList2String([-0.0], 0), "-0.000000")
+        self.ensureStringEqual("llList2String([-0.0], 0)", self.builtin_funcs.llList2String([-0.0], 0), "-0.000000")
         self.ensureStringEqual("(string)(float)\"-0.0\"", typecast(typecast("-0.0", float), str), "-0.000000")
         self.ensureStringEqual("(string)(vector)\"<-0.0,0.0,-0.0>\"", typecast(typecast("<-0.0,0.0,-0.0>", Vector), str), "<-0.00000, 0.00000, -0.00000>")
         self.ensureStringEqual("(string)(rotation)\"<-0.0,0.0,-0.0,0.0>\"", typecast(typecast("<-0.0,0.0,-0.0,0.0>", Quaternion), str), "<-0.00000, 0.00000, -0.00000, 0.00000>")

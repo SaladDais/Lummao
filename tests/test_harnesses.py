@@ -54,6 +54,16 @@ class HarnessTestCase(unittest.TestCase):
         script = self._compile_script_filename("continue_like_jump_with_ret.lsl")
         script.edefaultstate_entry()
 
+    def test_builtin_builtin_function_mocking(self):
+        script = self._compile_script_filename("function_mocking.lsl")
+
+        def _mutate_global(some_str):
+            # Doesn't say anything, just fiddles with a global
+            script.gFoo += 1
+        script.builtin_funcs["llOwnerSay"] = _mutate_global
+        script.edefaultstate_entry()
+        self.assertEqual(script.gFoo, 1)
+
 
 if __name__ == '__main__':
     unittest.main()

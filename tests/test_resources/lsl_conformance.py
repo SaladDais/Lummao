@@ -30,7 +30,7 @@ class Script(BaseLSLScript):
     def testFailed(self, description: str, actual: str, expected: str) -> None:
         self.gTestsFailed += 1
         print(radd(")", radd(expected, radd(" expected ", radd(actual, radd(" (", radd(description, "FAILED!: ")))))))
-        lslfuncs.llOwnerSay(typecast(rdiv(0, 0), str))
+        self.builtin_funcs.llOwnerSay(typecast(rdiv(0, 0), str))
 
     def ensureTrue(self, description: str, actual: int) -> None:
         if cond(actual):
@@ -51,7 +51,7 @@ class Script(BaseLSLScript):
             self.testFailed(description, typecast(actual, str), typecast(expected, str))
 
     def floatEqual(self, actual: float, expected: float) -> int:
-        error: float = lslfuncs.llFabs(rsub(actual, expected))
+        error: float = self.builtin_funcs.llFabs(rsub(actual, expected))
         epsilon: float = bin2float('0.001000', '6f12833a')
         if cond(rgreater(epsilon, error)):
             print(radd(typecast(error, str), "Float equality delta "))
@@ -114,11 +114,11 @@ class Script(BaseLSLScript):
         return self.testReturnVector()
 
     def testReturnVectorWithLibraryCall(self) -> Vector:
-        lslfuncs.llSin(0.0)
+        self.builtin_funcs.llSin(0.0)
         return Vector((1.0, 2.0, 3.0))
 
     def testReturnRotationWithLibraryCall(self) -> Quaternion:
-        lslfuncs.llSin(0.0)
+        self.builtin_funcs.llSin(0.0)
         return Quaternion((1.0, 2.0, 3.0, 4.0))
 
     def testParameters(self, param: int) -> int:
@@ -349,7 +349,7 @@ class Script(BaseLSLScript):
         self.ensureIntegerEqual("for(i = 0; i < 10; ++i);", i, 10)
         i = 1
         goto .SkipAssign
-        lslfuncs.llSetText("Error", Vector((1.0, 0.0, 0.0)), 1.0)
+        self.builtin_funcs.llSetText("Error", Vector((1.0, 0.0, 0.0)), 1.0)
         i = 2
         label .SkipAssign
         self.ensureIntegerEqual("assignjump", i, 1)
@@ -403,10 +403,10 @@ class Script(BaseLSLScript):
         self.ensureListEqual("leq1", l, l2)
         self.ensureListEqual("leq2", l, [5])
         self.ensureListEqual("leq3", [bin2float('1.500000', '0000c03f'), 6, Vector((1.0, 2.0, 3.0)), Quaternion((1.0, 2.0, 3.0, 4.0))], [bin2float('1.500000', '0000c03f'), 6, Vector((1.0, 2.0, 3.0)), Quaternion((1.0, 2.0, 3.0, 4.0))])
-        self.ensureIntegerEqual("sesc1", lslfuncs.llStringLength("\\"), 1)
-        self.ensureIntegerEqual("sesc2", lslfuncs.llStringLength("    "), 4)
-        self.ensureIntegerEqual("sesc3", lslfuncs.llStringLength("\n"), 1)
-        self.ensureIntegerEqual("sesc4", lslfuncs.llStringLength("\""), 1)
+        self.ensureIntegerEqual("sesc1", self.builtin_funcs.llStringLength("\\"), 1)
+        self.ensureIntegerEqual("sesc2", self.builtin_funcs.llStringLength("    "), 4)
+        self.ensureIntegerEqual("sesc3", self.builtin_funcs.llStringLength("\n"), 1)
+        self.ensureIntegerEqual("sesc4", self.builtin_funcs.llStringLength("\""), 1)
         self.ensureStringEqual("testExpressionLists([testExpressionLists([]), \"bar\"]) == \"foofoobar\"", self.testExpressionLists([self.testExpressionLists([]), "bar"]), "foofoobar")
         if cond(rboolor(1, rbooland(rbitor(rbitxor(rdiv(self.callOrderFunc(5), self.callOrderFunc(4)), self.callOrderFunc(3)), self.callOrderFunc(2)), rboolor(rmul(self.callOrderFunc(1), self.callOrderFunc(0)), 1)))):
             pass

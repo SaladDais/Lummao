@@ -21,7 +21,7 @@ import binascii
 import ctypes
 import struct
 import sys
-from typing import List, Sequence, Tuple, Any, Optional
+from typing import List, Sequence, Tuple, Any, Optional, Dict, Callable
 
 from lslopt import lslfuncs, lslcommon
 
@@ -189,11 +189,25 @@ class StateChangeException(Exception):
         self.new_state = new_state
 
 
+class CallableCollection(Dict[str, Callable]):
+    def __getattr__(self, item):
+        return self[item]
+
+
 class BaseLSLScript:
     def __init__(self):
         self.current_state: str = "default"
         self.next_state: Optional[str] = None
         self.event_queue: List[Tuple[str, Sequence[Any]]] = [("state_entry", ())]
+        self.builtin_funcs: CallableCollection = CallableCollection()
+        # Stuff all the builtins we have functions for into a big ol dict where they can be replaced
+        for func_name in dir(lslfuncs):
+            if not func_name.startswith("ll"):
+                continue
+            val = getattr(lslfuncs, func_name)
+            if not callable(val):
+                continue
+            self.builtin_funcs[func_name] = val
 
     def queue_event(self, event_name: str, args: Sequence[Any]):
         self.event_queue.append((event_name, args))

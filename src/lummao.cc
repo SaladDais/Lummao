@@ -359,7 +359,7 @@ bool PythonVisitor::visit(LSLListExpression *list_expr) {
 bool PythonVisitor::visit(LSLFunctionExpression *func_expr) {
   auto *sym = func_expr->getSymbol();
   if (sym->getSubType() == SYM_BUILTIN) {
-    mStr << "lslfuncs.";
+    mStr << "self.builtin_funcs.";
   } else {
     mStr << "self.";
   }
