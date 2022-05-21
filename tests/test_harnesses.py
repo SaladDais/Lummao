@@ -1,24 +1,16 @@
 import os.path
 import pathlib
 import unittest
-from subprocess import Popen, PIPE
+
+import lummao
 
 BASE_PATH = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 RESOURCES_PATH = BASE_PATH / "test_resources"
 
 
 class HarnessTestCase(unittest.TestCase):
-    def _compile_script_bytes(self, lsl_bytes):
-        p = Popen(['lummao', '-', '-'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        output = p.communicate(input=lsl_bytes)[0]
-        self.assertEqual(0, p.returncode)
-        new_globals = globals().copy()
-        exec(output, new_globals)
-        return new_globals["Script"]()
-
     def _compile_script_filename(self, lsl_filename):
-        with open(RESOURCES_PATH / lsl_filename, "rb") as f:
-            return self._compile_script_bytes(f.read())
+        return lummao.compile_script_file(RESOURCES_PATH / lsl_filename)
 
     def test_globals(self):
         script = self._compile_script_filename("lsl_conformance.lsl")

@@ -3,25 +3,13 @@ import dataclasses
 import os
 import sys
 import uuid
-from subprocess import Popen, PIPE
 from typing import Dict
 
 from werkzeug import Request, run_simple, Response
 from werkzeug.datastructures import Headers
 
+import lummao
 from lummao import Key, BaseLSLScript
-
-
-def _compile_script_bytes(lsl_bytes):
-    p = Popen(['lummao', '-', '-'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-    output, errors = p.communicate(input=lsl_bytes)
-    if p.returncode:
-        if errors:
-            print(errors.decode("utf8"), file=sys.stderr)
-        sys.exit(1)
-    new_globals = globals().copy()
-    exec(output, new_globals)
-    return new_globals["Script"]()
 
 
 @dataclasses.dataclass
@@ -98,10 +86,7 @@ def _get_url():
 
 
 def main():
-    lsl_file = sys.argv[1]
-    with open(lsl_file, "rb") as f:
-        lsl_bytes = f.read()
-    wrapped = LSLWSGIWrapper(_compile_script_bytes(lsl_bytes))
+    wrapped = LSLWSGIWrapper(lummao.compile_script_file(sys.argv[1]))
     # Let LSL stand itself up and figure out its URL
     wrapped.execute()
     run_simple(os.environ.get("SERVER_NAME", "localhost"), _get_port(), wrapped.handle_request)

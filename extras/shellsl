@@ -16,18 +16,6 @@ string exec(list command_parts) {return "";}
 """
 
 
-def _compile_script_bytes(lsl_bytes):
-    p = Popen(['lummao', '-', '-'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-    output, errors = p.communicate(input=lsl_bytes)
-    if p.returncode:
-        if errors:
-            print(errors.decode("utf8"), file=sys.stderr)
-        sys.exit(1)
-    new_globals = globals().copy()
-    exec(output, new_globals)
-    return new_globals["Script"]()
-
-
 class ShelLSLWrapper:
     script: lummao.BaseLSLScript
 
@@ -58,13 +46,12 @@ class ShelLSLWrapper:
 def main():
     lummao.lslfuncs.llOwnerSay = print
 
-    lsl_file = sys.argv[1]
-    with open(lsl_file, "rb") as f:
+    with open(sys.argv[1], "rb") as f:
         lsl_bytes = f.read()
     # strip shebang if present
     if lsl_bytes.startswith(b"#!"):
         lsl_bytes = b"\n".join(lsl_bytes.split(b"\n")[1:])
-    script = _compile_script_bytes(LSL_HEADER + lsl_bytes)
+    script = lummao.compile_script(LSL_HEADER + lsl_bytes)
     wrapped = ShelLSLWrapper(script, sys.argv[1:])
     wrapped.execute()
 
