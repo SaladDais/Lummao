@@ -175,7 +175,7 @@ class Script(BaseLSLScript):
         s = typecast(k, str)
         self.ensureStringEqual("k = NULL_KEY; string s; s = k;", s, "00000000-0000-0000-0000-000000000000")
         v: Vector = Vector((1.0, 1.0, 1.0))
-        while cond(v) == True:
+        while cond(v):
             v = Vector((0.0, 0.0, 0.0))
         self.ensureVectorEqual("while (v) { v = ZERO_VECTOR; }", v, Vector((0.0, 0.0, 0.0)))
         v = Vector((2.0, 2.0, 2.0))
@@ -192,7 +192,7 @@ class Script(BaseLSLScript):
             v = Vector((0.0, 0.0, 0.0))
         self.ensureVectorEqual("for (v = <3,3,3>;v;v=ZERO_VECTOR) {}", v, Vector((0.0, 0.0, 0.0)))
         k = typecast("7c42811e-229f-4500-b6d7-2c37324ff816", Key)
-        while cond(k) == True:
+        while cond(k):
             k = typecast("00000000-0000-0000-0000-000000000000", Key)
         self.ensureKeyEqual("while (k) { k = NULL_KEY; }", k, typecast("00000000-0000-0000-0000-000000000000", Key))
         k = typecast("7c42811e-229f-4500-b6d7-2c37324ff816", Key)
@@ -209,7 +209,7 @@ class Script(BaseLSLScript):
             k = typecast("00000000-0000-0000-0000-000000000000", Key)
         self.ensureKeyEqual("for (k = \"7c42811e-229f-4500-b6d7-2c37324ff816\";k;k=NULL_KEY) {}", k, typecast("00000000-0000-0000-0000-000000000000", Key))
         q: Quaternion = Quaternion((1.0, 1.0, 1.0, 1.0))
-        while cond(q) == True:
+        while cond(q):
             q = Quaternion((0.0, 0.0, 0.0, 1.0))
         self.ensureRotationEqual("while (q) { q = ZERO_ROTATION; }", q, Quaternion((0.0, 0.0, 0.0, 1.0)))
         q = Quaternion((2.0, 2.0, 2.0, 2.0))
@@ -233,7 +233,7 @@ class Script(BaseLSLScript):
                 break
         self.ensureListEqual("l = [2]; do { v = [] } while (l);", l, [])
         s = "1!"
-        while cond(s) == True:
+        while cond(s):
             s = ""
         self.ensureStringEqual("while (s) { s = \"\"; }", s, "")
         s = "2!"
@@ -250,7 +250,7 @@ class Script(BaseLSLScript):
             s = ""
         self.ensureStringEqual("for (s = \"3!\";s;s=\"\") {}", s, "")
         i: int = 1
-        while cond(i) == True:
+        while cond(i):
             i = 0
         self.ensureIntegerEqual("while (i) { i = 0; }", i, 0)
         i = 2
@@ -267,7 +267,7 @@ class Script(BaseLSLScript):
             i = 0
         self.ensureIntegerEqual("for (i = 3;i;i=0) {}", i, 0)
         f: float = 1.0
-        while cond(f) == True:
+        while cond(f):
             f = 0.0
         self.ensureFloatEqual("while (f) { f = 0; }", f, 0.0)
         f = 2.0

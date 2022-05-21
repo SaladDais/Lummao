@@ -727,7 +727,7 @@ bool PythonVisitor::visit(LSLWhileStatement *while_stmt) {
   doTabs();
   mStr << "while ";
   while_stmt->getCheckExpr()->visit(this);
-  mStr << " == True:\n";
+  mStr << ":\n";
   {
     ScopedTabSetter tab_setter_1(this, mTabs + 1);
     while_stmt->getBody()->visit(this);
