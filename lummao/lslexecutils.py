@@ -219,7 +219,7 @@ class BaseLSLScript:
             func(*args)
 
     def execute_one(self):
-        event, event_args = self.event_queue.pop(-1)
+        event, event_args = self.event_queue.pop(0)
         try:
             self._trigger_event_handler(event, *event_args)
             # TODO: Check this is correct, is changing state in state_exit possible?
