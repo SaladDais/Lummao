@@ -324,10 +324,16 @@ bool PythonVisitor::visit(LSLTypecastExpression *cast_expr) {
   auto from_type = child_expr->getIType();
   auto to_type = cast_expr->getIType();
   if (from_type == LST_INTEGER && to_type == LST_FLOATINGPOINT) {
-    // this is less annoying to read and basically the same thing
-    mStr << "float(";
-    child_expr->visit(this);
-    mStr << ')';
+    // these are less annoying to read and basically the same thing
+    if (child_expr->getNodeSubType() == NODE_CONSTANT_EXPRESSION) {
+      // runtime cast makes this ugly and isn't necessary, just print it as a float literal.
+      child_expr->visit(this);
+      mStr << ".0";
+    } else {
+      mStr << "float(";
+      child_expr->visit(this);
+      mStr << ')';
+    }
     return false;
   }
   mStr << "typecast(";

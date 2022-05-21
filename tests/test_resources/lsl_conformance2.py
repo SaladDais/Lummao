@@ -105,30 +105,30 @@ class Script(BaseLSLScript):
         return typecast("00000000-0000-0000-0000-000000000000", Key)
 
     def testArgumentAccessor(self, v: Vector) -> None:
-        v = Vector((float(0), float(0), float(0)))
+        v = Vector((0.0, 0.0, 0.0))
         v = replace_coord_axis(v, 0, self.testReturnFloat())
         v = replace_coord_axis(v, 1, self.testReturnFloat())
         v = replace_coord_axis(v, 2, self.testReturnFloat())
-        self.ensureVectorEqual("testArgumentAccessor", v, Vector((float(1), float(1), float(1))))
+        self.ensureVectorEqual("testArgumentAccessor", v, Vector((1.0, 1.0, 1.0)))
 
     def testLocalAccessor(self) -> None:
-        v: Vector = Vector((float(0), float(0), float(0)))
+        v: Vector = Vector((0.0, 0.0, 0.0))
         v = replace_coord_axis(v, 0, self.testReturnFloat())
         v = replace_coord_axis(v, 1, self.testReturnFloat())
         v = replace_coord_axis(v, 2, self.testReturnFloat())
-        self.ensureVectorEqual("testLocalAccessor", v, Vector((float(1), float(1), float(1))))
+        self.ensureVectorEqual("testLocalAccessor", v, Vector((1.0, 1.0, 1.0)))
 
     def testGlobalAccessor(self) -> None:
-        self.gVector = Vector((float(0), float(0), float(0)))
+        self.gVector = Vector((0.0, 0.0, 0.0))
         self.gVector = replace_coord_axis(self.gVector, 0, self.testReturnFloat())
         self.gVector = replace_coord_axis(self.gVector, 1, self.testReturnFloat())
         self.gVector = replace_coord_axis(self.gVector, 2, self.testReturnFloat())
-        self.ensureVectorEqual("testGlobalAccessor", self.gVector, Vector((float(1), float(1), float(1))))
+        self.ensureVectorEqual("testGlobalAccessor", self.gVector, Vector((1.0, 1.0, 1.0)))
 
     def tests(self) -> None:
         self.ensureTrue("gVisitedStateTest ", self.gVisitedStateTest)
         self.ensureFloatExactEqual("1.4e-45 == (float)\"1.4e-45\"", bin2float('0.000000', '01000000'), typecast("1.4e-45", float))
-        self.testArgumentAccessor(Vector((float(0), float(0), float(0))))
+        self.testArgumentAccessor(Vector((0.0, 0.0, 0.0)))
         self.testLocalAccessor()
         self.testGlobalAccessor()
         self.ensureStringEqual("(string)[1, testReturnFloat(), testReturnFloat()] == \"11.01.0\"", typecast([1, self.testReturnFloat(), self.testReturnFloat()], str), "11.0000001.000000")
@@ -146,7 +146,7 @@ class Script(BaseLSLScript):
         self.ensureIntegerEqual("[1,2] != [2]", rneq([2], [1, 2]), 1)
         self.ensureIntegerEqual("[1] != [2,3]", rneq([2, 3], [1]), -1)
         self.ensureFloatEqual("(float)\"5.0a\" == 5.0", typecast("5a", float), 5.0)
-        self.ensureFloatEqual("(integer)\"12foo\" == 12", float(typecast("12foo", int)), float(12))
+        self.ensureFloatEqual("(integer)\"12foo\" == 12", float(typecast("12foo", int)), 12.0)
         l: list = []
         l = [42]
         radd(1, l)
@@ -158,10 +158,10 @@ class Script(BaseLSLScript):
         radd("00000000-0000-0000-0000-000000000000", l)
         self.ensureListEqual("list l = [42]; l + NULL_KEY; l == [42]", l, [42])
         l = [42]
-        radd(Vector((float(1), float(2), float(3))), l)
+        radd(Vector((1.0, 2.0, 3.0)), l)
         self.ensureListEqual("list l = [42]; l + <1,2,3>; l == [42]", l, [42])
         l = [42]
-        radd(Quaternion((float(1), float(2), float(3), float(4))), l)
+        radd(Quaternion((1.0, 2.0, 3.0, 4.0)), l)
         self.ensureListEqual("list l = [42]; l + <1,2,3>; l == [42]", l, [42])
         if cond(k):
             self.testFailed("if(k)", "TRUE", "FALSE")
@@ -174,17 +174,17 @@ class Script(BaseLSLScript):
         s: str = ""
         s = typecast(k, str)
         self.ensureStringEqual("k = NULL_KEY; string s; s = k;", s, "00000000-0000-0000-0000-000000000000")
-        v: Vector = Vector((float(1), float(1), float(1)))
+        v: Vector = Vector((1.0, 1.0, 1.0))
         while cond(v) == True:
             v = Vector((0.0, 0.0, 0.0))
         self.ensureVectorEqual("while (v) { v = ZERO_VECTOR; }", v, Vector((0.0, 0.0, 0.0)))
-        v = Vector((float(2), float(2), float(2)))
+        v = Vector((2.0, 2.0, 2.0))
         while True == True:
             v = Vector((0.0, 0.0, 0.0))
             if not cond(v):
                 break
         self.ensureVectorEqual("v = <2,2,2>; do { v = ZERO_VECTOR } while (v);", v, Vector((0.0, 0.0, 0.0)))
-        v = Vector((float(3), float(3), float(3)))
+        v = Vector((3.0, 3.0, 3.0))
         while True == True:
             if not cond(v):
                 break
@@ -208,17 +208,17 @@ class Script(BaseLSLScript):
             pass
             k = typecast("00000000-0000-0000-0000-000000000000", Key)
         self.ensureKeyEqual("for (k = \"7c42811e-229f-4500-b6d7-2c37324ff816\";k;k=NULL_KEY) {}", k, typecast("00000000-0000-0000-0000-000000000000", Key))
-        q: Quaternion = Quaternion((float(1), float(1), float(1), float(1)))
+        q: Quaternion = Quaternion((1.0, 1.0, 1.0, 1.0))
         while cond(q) == True:
             q = Quaternion((0.0, 0.0, 0.0, 1.0))
         self.ensureRotationEqual("while (q) { q = ZERO_ROTATION; }", q, Quaternion((0.0, 0.0, 0.0, 1.0)))
-        q = Quaternion((float(2), float(2), float(2), float(2)))
+        q = Quaternion((2.0, 2.0, 2.0, 2.0))
         while True == True:
             q = Quaternion((0.0, 0.0, 0.0, 1.0))
             if not cond(q):
                 break
         self.ensureRotationEqual("q = <2,2,2>; do { v = ZERO_ROTATION } while (q);", q, Quaternion((0.0, 0.0, 0.0, 1.0)))
-        q = Quaternion((float(3), float(3), float(3), float(3)))
+        q = Quaternion((3.0, 3.0, 3.0, 3.0))
         while True == True:
             if not cond(q):
                 break
@@ -266,35 +266,35 @@ class Script(BaseLSLScript):
             pass
             i = 0
         self.ensureIntegerEqual("for (i = 3;i;i=0) {}", i, 0)
-        f: float = float(1)
+        f: float = 1.0
         while cond(f) == True:
-            f = float(0)
-        self.ensureFloatEqual("while (f) { f = 0; }", f, float(0))
-        f = float(2)
+            f = 0.0
+        self.ensureFloatEqual("while (f) { f = 0; }", f, 0.0)
+        f = 2.0
         while True == True:
-            f = float(0)
+            f = 0.0
             if not cond(f):
                 break
-        self.ensureFloatEqual("f = 2; do { f = 0 } while (f);", f, float(0))
-        f = float(3)
+        self.ensureFloatEqual("f = 2; do { f = 0 } while (f);", f, 0.0)
+        f = 3.0
         while True == True:
             if not cond(f):
                 break
             pass
-            f = float(0)
-        self.ensureFloatEqual("for (f = 3;f;f=0) {}", f, float(0))
-        v = Vector((float(1), float(2), float(3)))
-        v = rmul(float(2), v)
-        self.ensureVectorEqual("v = <1,2,3>; v *= 2;", v, Vector((float(2), float(4), float(6))))
-        v = Vector((float(1), float(2), float(3)))
+            f = 0.0
+        self.ensureFloatEqual("for (f = 3;f;f=0) {}", f, 0.0)
+        v = Vector((1.0, 2.0, 3.0))
+        v = rmul(2.0, v)
+        self.ensureVectorEqual("v = <1,2,3>; v *= 2;", v, Vector((2.0, 4.0, 6.0)))
+        v = Vector((1.0, 2.0, 3.0))
         v = rmul(bin2float('0.500000', '0000003f'), v)
-        self.ensureVectorEqual("v = <1,2,3>; v *= 0.5;", v, Vector((bin2float('0.500000', '0000003f'), float(1), bin2float('1.500000', '0000c03f'))))
-        v = Vector((float(1), float(0), float(0)))
+        self.ensureVectorEqual("v = <1,2,3>; v *= 0.5;", v, Vector((bin2float('0.500000', '0000003f'), 1.0, bin2float('1.500000', '0000c03f'))))
+        v = Vector((1.0, 0.0, 0.0))
         v = rmul(Quaternion((0.0, 0.0, 0.0, 1.0)), v)
-        self.ensureVectorEqual("vector v = <1,0,0>; v *= ZERO_ROTATION;", v, Vector((float(1), float(0), float(0))))
-        v = Vector((float(0), float(1), float(0)))
-        v = rmod(Vector((float(0), float(0), float(1))), v)
-        self.ensureVectorEqual("vector v = <0,1,0>; v %= <0,0,1>;", v, Vector((float(1), float(0), float(0))))
+        self.ensureVectorEqual("vector v = <1,0,0>; v *= ZERO_ROTATION;", v, Vector((1.0, 0.0, 0.0)))
+        v = Vector((0.0, 1.0, 0.0))
+        v = rmod(Vector((0.0, 0.0, 1.0)), v)
+        self.ensureVectorEqual("vector v = <0,1,0>; v %= <0,0,1>;", v, Vector((1.0, 0.0, 0.0)))
         r: Quaternion = Quaternion((0.0, 0.0, 0.0, 1.0))
         r = rmul(Quaternion((0.0, 0.0, 0.0, 1.0)), r)
         self.ensureRotationEqual("rotation r = ZERO_ROTATION; r *= ZERO_ROTATION;", r, Quaternion((0.0, 0.0, 0.0, 1.0)))
@@ -314,7 +314,7 @@ class Script(BaseLSLScript):
         defaultInteger: int = 0
         self.ensureIntegerEqual("key defaultInteger;", defaultInteger, 0)
         defaultFloat: float = 0.0
-        self.ensureFloatEqual("key defaultInteger;", defaultFloat, float(0))
+        self.ensureFloatEqual("key defaultInteger;", defaultFloat, 0.0)
         defaultString: str = ""
         self.ensureStringEqual("string defaultString;", defaultString, "")
         self.ensureIntegerEqual("chat == TRUE", self.chat, 1)
