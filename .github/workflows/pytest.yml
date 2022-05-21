@@ -22,26 +22,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements-test.txt
-        
-        sudo apt-get install cmake build-essential g++ flex bison
-        
-        git clone https://github.com/SaladDais/tailslide tailslide
-        pushd tailslide
-        mkdir build
-        pushd build
-        cmake ..
-        sudo make -j2 install
-        popd
-        popd
-        
-        mkdir build
-        pushd build
-        cmake ..
-        sudo make install
-        popd
-        
-        git clone https://github.com/Sei-Lisa/LSL-PyOptimizer.git pyoptimizer
-        echo "LSL_PYOPTIMIZER_PATH=$(pwd)/pyoptimizer" >> $GITHUB_ENV
+
+        source ./bootstrap_ubuntu_ci.sh
+        python setup.py install
+
+        # Var was exported by `bootstrap_ubuntu_ci.sh`
+        echo "LSL_PYOPTIMIZER_PATH=${LSL_PYOPTIMIZER_PATH}" >> $GITHUB_ENV
 
     - name: Run Flake8
       run: |
