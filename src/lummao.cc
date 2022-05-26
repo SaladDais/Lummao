@@ -10,6 +10,7 @@ class PythonVisitor : public ASTVisitor {
   protected:
   void writeChildrenSep(LSLASTNode *parent, const char *separator);
   void writeFloat(float f_val);
+  std::string getSymbolName(LSLSymbol *sym);
 
   virtual bool visit(LSLScript *script);
   virtual bool visit(LSLGlobalVariable *glob_var);
@@ -137,8 +138,20 @@ void PythonVisitor::writeFloat(float f_val) {
   );
   // the human-readable float val is first in the tuple, but it isn't actually used, it's only there
   // for readability.
-  // TODO: some kind of heuristic for floats that are representable in float literal form.
+  // TODO: some better heuristic for floats that are representable in float literal form.
   mStr << "bin2float('" << std::to_string(f_val) << "', '"<< (const char*)&s_val << "')";
+}
+
+std::string PythonVisitor::getSymbolName(LSLSymbol *sym) {
+  switch (sym->getSubType()) {
+    // Stop common stuff from colliding with Python builtins (not a good solution!)
+    case SYM_LOCAL:
+    case SYM_FUNCTION_PARAMETER:
+    case SYM_EVENT_PARAMETER:
+      return std::string("_") + sym->getName();
+    default:
+      return sym->getName();
+  }
 }
 
 bool PythonVisitor::visit(LSLScript *script) {
@@ -155,9 +168,9 @@ bool PythonVisitor::visit(LSLScript *script) {
     if (glob->getNodeType() != NODE_GLOBAL_VARIABLE)
       continue;
     auto *glob_var = (LSLGlobalVariable *)glob;
-    auto *id = glob_var->getIdentifier();
+    auto *sym = glob_var->getSymbol();
     doTabs();
-    mStr << id->getName() << ": " << PY_TYPE_NAMES[id->getIType()] << '\n';
+    mStr << getSymbolName(sym) << ": " << PY_TYPE_NAMES[sym->getIType()] << '\n';
   }
 
   mStr << '\n';
@@ -192,7 +205,7 @@ bool PythonVisitor::visit(LSLScript *script) {
 bool PythonVisitor::visit(LSLGlobalVariable *glob_var) {
   auto *sym = glob_var->getSymbol();
   doTabs();
-  mStr << "self." << sym->getName() << " = ";
+  mStr << "self." << getSymbolName(sym) << " = ";
   LSLASTNode *initializer = glob_var->getInitializer();
   if (!initializer) {
     initializer = sym->getType()->getDefaultValue();
@@ -203,18 +216,18 @@ bool PythonVisitor::visit(LSLGlobalVariable *glob_var) {
 }
 
 bool PythonVisitor::visit(LSLGlobalFunction *glob_func) {
-  auto *id = glob_func->getIdentifier();
   auto *func_sym = glob_func->getSymbol();
   if (func_sym->getHasJumps()) {
     doTabs();
     mStr << "@with_goto\n";
   }
   doTabs();
-  mStr << "def " << id->getName() << "(self";
+  mStr << "def " << getSymbolName(func_sym) << "(self";
   for (auto *arg : *glob_func->getArguments()) {
-    mStr << ", " << arg->getName() << ": " << PY_TYPE_NAMES[arg->getIType()];
+    auto *arg_sym = arg->getSymbol();
+    mStr << ", " << getSymbolName(arg_sym) << ": " << PY_TYPE_NAMES[arg_sym->getIType()];
   }
-  mStr << ") -> " << PY_TYPE_NAMES[id->getIType()] << ":\n";
+  mStr << ") -> " << PY_TYPE_NAMES[func_sym->getIType()] << ":\n";
   visitFuncLike(glob_func, glob_func->getStatements());
   return false;
 }
@@ -228,9 +241,10 @@ bool PythonVisitor::visit(LSLEventHandler *event_handler) {
     mStr << "@with_goto\n";
   }
   doTabs();
-  mStr << "def e" << state_sym->getName() << id->getName() << "(self";
+  mStr << "def e" << getSymbolName(state_sym) << id->getName() << "(self";
   for (auto *arg : *event_handler->getArguments()) {
-    mStr << ", " << arg->getName() << ": " << PY_TYPE_NAMES[arg->getIType()];
+    auto *arg_sym = arg->getSymbol();
+    mStr << ", " << getSymbolName(arg_sym) << ": " << PY_TYPE_NAMES[arg_sym->getIType()];
   }
   mStr << ") -> " << PY_TYPE_NAMES[id->getIType()] << ":\n";
   visitFuncLike(event_handler, event_handler->getStatements());
@@ -363,7 +377,7 @@ bool PythonVisitor::visit(LSLFunctionExpression *func_expr) {
   } else {
     mStr << "self.";
   }
-  mStr << sym->getName() << "(";
+  mStr << getSymbolName(sym) << "(";
   for (auto *arg : *func_expr->getArguments()) {
     arg->visit(this);
     if (arg->getNext())
@@ -391,7 +405,7 @@ static int member_to_offset(const char *member) {
 bool PythonVisitor::visit(LSLLValueExpression *lvalue) {
   if (lvalue->getSymbol()->getSubType() == SYM_GLOBAL)
     mStr << "self.";
-  mStr << lvalue->getIdentifier()->getName();
+  mStr << getSymbolName(lvalue->getSymbol());
   if (auto *member = lvalue->getMember()) {
     mStr << '[' << member_to_offset(member->getName()) << ']';
   }
@@ -405,7 +419,7 @@ void PythonVisitor::constructMutatedMember(LSLSymbol *sym, LSLIdentifier *member
   mStr << "replace_coord_axis(";
   if (sym->getSubType() == SYM_GLOBAL)
     mStr << "self.";
-  mStr << sym->getName() << ", " << member_offset << ", ";
+  mStr << getSymbolName(sym) << ", " << member_offset << ", ";
   rhs->visit(this);
   mStr << ')';
 }
@@ -424,7 +438,7 @@ bool PythonVisitor::visit(LSLBinaryExpression *bin_expr) {
     if (!bin_expr->getResultNeeded()) {
       if (sym->getSubType() == SYM_GLOBAL)
         mStr << "self.";
-      mStr << sym->getName() << " = ";
+      mStr << getSymbolName(sym) << " = ";
       if (auto *member = lvalue->getMember()) {
         constructMutatedMember(sym, member, rhs);
       } else {
@@ -433,13 +447,13 @@ bool PythonVisitor::visit(LSLBinaryExpression *bin_expr) {
     } else {
       if (sym->getSubType() == SYM_GLOBAL) {
         // walrus operator can't assign to these, need to use special assignment helper.
-        mStr << "assign(self.__dict__, \"" << sym->getName() << "\", ";
+        mStr << "assign(self.__dict__, \"" << getSymbolName(sym) << "\", ";
       } else {
         // We need to wrap this assignment in parens so we can use the walrus operator.
         // walrus operator works regardless of expression or statement context, but doesn't
         // work for cases like `(self.foo := 2)` where we're assigning to an attribute rather than
         // just a single identifier...
-        mStr << '(' << sym->getName() << " := ";
+        mStr << '(' << getSymbolName(sym) << " := ";
       }
 
       if (auto *member = lvalue->getMember()) {
@@ -459,9 +473,9 @@ bool PythonVisitor::visit(LSLBinaryExpression *bin_expr) {
     auto *sym = lhs->getSymbol();
     if (sym->getSubType() == SYM_GLOBAL) {
       // walrus operator can't assign to these, need to use special assignment helper.
-      mStr << "assign(self.__dict__, \"" << sym->getName() << "\", ";
+      mStr << "assign(self.__dict__, \"" << getSymbolName(sym) << "\", ";
     } else {
-      mStr << '(' << sym->getName() << " := ";
+      mStr << '(' << getSymbolName(sym) << " := ";
     }
     // don't have to consider the member case, no such thing as coordinates with int members.
     mStr << "typecast(rmul(";
@@ -531,7 +545,7 @@ bool PythonVisitor::visit(LSLUnaryExpression *unary_expr) {
         mStr << "self.__dict__";
       else
         mStr << "locals()";
-      mStr << ", \"" << sym->getName() << "\"";
+      mStr << ", \"" << getSymbolName(sym) << "\"";
       if (auto *member = lvalue->getMember()) {
         mStr << ", " << member_to_offset(member->getName());
       }
@@ -540,7 +554,7 @@ bool PythonVisitor::visit(LSLUnaryExpression *unary_expr) {
       // in statement context, we can use the more idiomatic foo += 1 or foo -= 1.
       if (sym->getSubType() == SYM_GLOBAL)
         mStr << "self.";
-      mStr << sym->getName();
+      mStr << getSymbolName(sym);
       if (op == OP_POST_DECR || op == OP_PRE_DECR) {
         mStr << " -= ";
       } else {
@@ -625,7 +639,7 @@ bool PythonVisitor::visit(LSLDeclaration *decl_stmt) {
     // node that would have done an assignment. No unstructured jumps means no use-before-initialization
     // means no need to hoist. At least as of CPython 3.11 beta, these "unnecessary" declarations aren't
     // eliminated by the peepholer.
-    _mFuncPreludeStr << sym->getName() << ": " << PY_PRELUDE_TYPE_NAMES[sym->getIType()] << " = ";
+    _mFuncPreludeStr << getSymbolName(sym) << ": " << PY_PRELUDE_TYPE_NAMES[sym->getIType()] << " = ";
     switch(sym->getIType()) {
       case LST_INTEGER:
         _mFuncPreludeStr << "0";
@@ -651,10 +665,10 @@ bool PythonVisitor::visit(LSLDeclaration *decl_stmt) {
     _mFuncPreludeStr << '\n';
 
     // now handle the assignment at the actual declaration node
-    mStr << sym->getName() << " = ";
+    mStr << getSymbolName(sym) << " = ";
   } else {
     // don't need hoisting, do the declaration inline
-    mStr << sym->getName() << ": " << PY_TYPE_NAMES[sym->getIType()] << " = ";
+    mStr << getSymbolName(sym) << ": " << PY_TYPE_NAMES[sym->getIType()] << " = ";
   }
 
   LSLASTNode *initializer = decl_stmt->getInitializer();
@@ -760,13 +774,13 @@ bool PythonVisitor::visit(LSLJumpStatement *jump_stmt) {
   // LSL's `for` semantics differ from Python's, so we'd have to use
   // an exception in the `for` case anyways. No sense in pretending
   // we have structured jumps when we really don't, I guess.
-  mStr << "goto ." << jump_stmt->getSymbol()->getName() << "\n";
+  mStr << "goto ." << getSymbolName(jump_stmt->getSymbol()) << "\n";
   return false;
 }
 
 bool PythonVisitor::visit(LSLLabel *label_stmt) {
   doTabs();
-  mStr << "label ." << label_stmt->getSymbol()->getName() << "\n";
+  mStr << "label ." << getSymbolName(label_stmt->getSymbol()) << "\n";
   return false;
 }
 
@@ -802,7 +816,7 @@ void PythonVisitor::writeReturn(LSLExpression *ret_expr) {
 
 bool PythonVisitor::visit(LSLStateStatement *state_stmt) {
   doTabs();
-  mStr << "raise StateChangeException('" << state_stmt->getSymbol()->getName() << "')\n";
+  mStr << "raise StateChangeException('" << getSymbolName(state_stmt->getSymbol()) << "')\n";
   return false;
 }
 

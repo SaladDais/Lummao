@@ -24,72 +24,72 @@ class Script(BaseLSLScript):
         self.gList = [1, 2, 3]
         self.gCallOrder = []
 
-    def testPassed(self, description: str, actual: str, expected: str) -> None:
+    def testPassed(self, _description: str, _actual: str, _expected: str) -> None:
         self.gTestsPassed += 1
 
-    def testFailed(self, description: str, actual: str, expected: str) -> None:
+    def testFailed(self, _description: str, _actual: str, _expected: str) -> None:
         self.gTestsFailed += 1
-        print(radd(")", radd(expected, radd(" expected ", radd(actual, radd(" (", radd(description, "FAILED!: ")))))))
+        print(radd(")", radd(_expected, radd(" expected ", radd(_actual, radd(" (", radd(_description, "FAILED!: ")))))))
         self.builtin_funcs.llOwnerSay(typecast(rdiv(0, 0), str))
 
-    def ensureTrue(self, description: str, actual: int) -> None:
-        if cond(actual):
-            self.testPassed(description, typecast(actual, str), typecast(1, str))
+    def ensureTrue(self, _description: str, _actual: int) -> None:
+        if cond(_actual):
+            self.testPassed(_description, typecast(_actual, str), typecast(1, str))
         else:
-            self.testFailed(description, typecast(actual, str), typecast(1, str))
+            self.testFailed(_description, typecast(_actual, str), typecast(1, str))
 
-    def ensureFalse(self, description: str, actual: int) -> None:
-        if cond(actual):
-            self.testFailed(description, typecast(actual, str), typecast(0, str))
+    def ensureFalse(self, _description: str, _actual: int) -> None:
+        if cond(_actual):
+            self.testFailed(_description, typecast(_actual, str), typecast(0, str))
         else:
-            self.testPassed(description, typecast(actual, str), typecast(0, str))
+            self.testPassed(_description, typecast(_actual, str), typecast(0, str))
 
-    def ensureIntegerEqual(self, description: str, actual: int, expected: int) -> None:
-        if cond(req(expected, actual)):
-            self.testPassed(description, typecast(actual, str), typecast(expected, str))
+    def ensureIntegerEqual(self, _description: str, _actual: int, _expected: int) -> None:
+        if cond(req(_expected, _actual)):
+            self.testPassed(_description, typecast(_actual, str), typecast(_expected, str))
         else:
-            self.testFailed(description, typecast(actual, str), typecast(expected, str))
+            self.testFailed(_description, typecast(_actual, str), typecast(_expected, str))
 
-    def floatEqual(self, actual: float, expected: float) -> int:
-        error: float = self.builtin_funcs.llFabs(rsub(actual, expected))
-        epsilon: float = bin2float('0.001000', '6f12833a')
-        if cond(rgreater(epsilon, error)):
-            print(radd(typecast(error, str), "Float equality delta "))
+    def floatEqual(self, _actual: float, _expected: float) -> int:
+        _error: float = self.builtin_funcs.llFabs(rsub(_actual, _expected))
+        _epsilon: float = bin2float('0.001000', '6f12833a')
+        if cond(rgreater(_epsilon, _error)):
+            print(radd(typecast(_error, str), "Float equality delta "))
             return 0
         return 1
 
-    def ensureFloatEqual(self, description: str, actual: float, expected: float) -> None:
-        if cond(self.floatEqual(actual, expected)):
-            self.testPassed(description, typecast(actual, str), typecast(expected, str))
+    def ensureFloatEqual(self, _description: str, _actual: float, _expected: float) -> None:
+        if cond(self.floatEqual(_actual, _expected)):
+            self.testPassed(_description, typecast(_actual, str), typecast(_expected, str))
         else:
-            self.testFailed(description, typecast(actual, str), typecast(expected, str))
+            self.testFailed(_description, typecast(_actual, str), typecast(_expected, str))
 
-    def ensureStringEqual(self, description: str, actual: str, expected: str) -> None:
-        if cond(req(expected, actual)):
-            self.testPassed(description, typecast(actual, str), typecast(expected, str))
+    def ensureStringEqual(self, _description: str, _actual: str, _expected: str) -> None:
+        if cond(req(_expected, _actual)):
+            self.testPassed(_description, typecast(_actual, str), typecast(_expected, str))
         else:
-            self.testFailed(description, typecast(actual, str), typecast(expected, str))
+            self.testFailed(_description, typecast(_actual, str), typecast(_expected, str))
 
-    def ensureVectorEqual(self, description: str, actual: Vector, expected: Vector) -> None:
-        if cond(rbooland(self.floatEqual(actual[2], expected[2]), rbooland(self.floatEqual(actual[1], expected[1]), self.floatEqual(actual[0], expected[0])))):
-            self.testPassed(description, typecast(actual, str), typecast(expected, str))
+    def ensureVectorEqual(self, _description: str, _actual: Vector, _expected: Vector) -> None:
+        if cond(rbooland(self.floatEqual(_actual[2], _expected[2]), rbooland(self.floatEqual(_actual[1], _expected[1]), self.floatEqual(_actual[0], _expected[0])))):
+            self.testPassed(_description, typecast(_actual, str), typecast(_expected, str))
         else:
-            self.testFailed(description, typecast(actual, str), typecast(expected, str))
+            self.testFailed(_description, typecast(_actual, str), typecast(_expected, str))
 
-    def ensureRotationEqual(self, description: str, actual: Quaternion, expected: Quaternion) -> None:
-        if cond(rbooland(self.floatEqual(actual[3], expected[3]), rbooland(self.floatEqual(actual[2], expected[2]), rbooland(self.floatEqual(actual[1], expected[1]), self.floatEqual(actual[0], expected[0]))))):
-            self.testPassed(description, typecast(actual, str), typecast(expected, str))
+    def ensureRotationEqual(self, _description: str, _actual: Quaternion, _expected: Quaternion) -> None:
+        if cond(rbooland(self.floatEqual(_actual[3], _expected[3]), rbooland(self.floatEqual(_actual[2], _expected[2]), rbooland(self.floatEqual(_actual[1], _expected[1]), self.floatEqual(_actual[0], _expected[0]))))):
+            self.testPassed(_description, typecast(_actual, str), typecast(_expected, str))
         else:
-            self.testFailed(description, typecast(actual, str), typecast(expected, str))
+            self.testFailed(_description, typecast(_actual, str), typecast(_expected, str))
 
-    def ensureListEqual(self, description: str, actual: list, expected: list) -> None:
-        if cond(rbooland((req(typecast(expected, str), typecast(actual, str))), req(expected, actual))):
-            self.testPassed(description, typecast(actual, str), typecast(expected, str))
+    def ensureListEqual(self, _description: str, _actual: list, _expected: list) -> None:
+        if cond(rbooland((req(typecast(_expected, str), typecast(_actual, str))), req(_expected, _actual))):
+            self.testPassed(_description, typecast(_actual, str), typecast(_expected, str))
         else:
-            self.testFailed(description, typecast(actual, str), typecast(expected, str))
+            self.testFailed(_description, typecast(_actual, str), typecast(_expected, str))
 
-    def callOrderFunc(self, num: int) -> int:
-        self.gCallOrder = radd([num], self.gCallOrder)
+    def callOrderFunc(self, _num: int) -> int:
+        self.gCallOrder = radd([_num], self.gCallOrder)
         return 1
 
     def testReturn(self) -> int:
@@ -121,29 +121,29 @@ class Script(BaseLSLScript):
         self.builtin_funcs.llSin(0.0)
         return Quaternion((1.0, 2.0, 3.0, 4.0))
 
-    def testParameters(self, param: int) -> int:
-        param = radd(1, param)
-        return param
+    def testParameters(self, _param: int) -> int:
+        _param = radd(1, _param)
+        return _param
 
-    def testRecursion(self, param: int) -> int:
-        if cond(rleq(0, param)):
+    def testRecursion(self, _param: int) -> int:
+        if cond(rleq(0, _param)):
             return 0
         else:
-            return self.testRecursion(rsub(1, param))
+            return self.testRecursion(rsub(1, _param))
 
-    def testExpressionLists(self, l: list) -> str:
-        return radd(typecast(l, str), "foo")
+    def testExpressionLists(self, _l: list) -> str:
+        return radd(typecast(_l, str), "foo")
 
     @with_goto
     def tests(self) -> None:
-        a: Optional[list] = None
-        b: Optional[list] = None
-        c: Optional[list] = None
-        i: int = 0
-        v: Vector = Vector((0.0, 0.0, 0.0))
-        q: Quaternion = Quaternion((0.0, 0.0, 0.0, 0.0))
-        l: Optional[list] = None
-        l2: Optional[list] = None
+        _a: Optional[list] = None
+        _b: Optional[list] = None
+        _c: Optional[list] = None
+        _i: int = 0
+        _v: Vector = Vector((0.0, 0.0, 0.0))
+        _q: Quaternion = Quaternion((0.0, 0.0, 0.0, 0.0))
+        _l: Optional[list] = None
+        _l2: Optional[list] = None
         self.ensureIntegerEqual("TRUE", 1, 1)
         self.ensureIntegerEqual("FALSE", 0, 0)
         if cond(0.0):
@@ -245,17 +245,17 @@ class Script(BaseLSLScript):
         self.ensureListEqual("(1 + [2])", (radd([2], "one")), ["one", 2])
         self.ensureListEqual("(<1.0,1.0,1.0,1.0> + [2])", (radd([2], Quaternion((1.0, 1.0, 1.0, 1.0)))), [Quaternion((1.0, 1.0, 1.0, 1.0)), 2])
         self.ensureListEqual("(<1.0,1.0,1.0> + [2])", (radd([2], Vector((1.0, 1.0, 1.0)))), [Vector((1.0, 1.0, 1.0)), 2])
-        a = []
-        b = a
-        a = radd(["foo"], a)
-        self.ensureListEqual("list a = []; list b = a; a += [\"foo\"]; a == [\"foo\"]", a, ["foo"])
-        self.ensureListEqual("list a = []; list b = a; a += [\"foo\"]; b == []", b, [])
-        a = ["a"]
-        b = ["b"]
-        c = radd(b, a)
-        self.ensureListEqual("a = [\"a\"]; b = [\"b\"]; list c = a + b; a == [\"a\"];", a, ["a"])
-        self.ensureListEqual("a = [\"a\"]; b = [\"b\"]; list c = a + b; b == [\"b\"];", b, ["b"])
-        self.ensureListEqual("a = [\"a\"]; b = [\"b\"]; list c = a + b; c == [\"a\", \"b\"];", c, ["a", "b"])
+        _a = []
+        _b = _a
+        _a = radd(["foo"], _a)
+        self.ensureListEqual("list a = []; list b = a; a += [\"foo\"]; a == [\"foo\"]", _a, ["foo"])
+        self.ensureListEqual("list a = []; list b = a; a += [\"foo\"]; b == []", _b, [])
+        _a = ["a"]
+        _b = ["b"]
+        _c = radd(_b, _a)
+        self.ensureListEqual("a = [\"a\"]; b = [\"b\"]; list c = a + b; a == [\"a\"];", _a, ["a"])
+        self.ensureListEqual("a = [\"a\"]; b = [\"b\"]; list c = a + b; b == [\"b\"];", _b, ["b"])
+        self.ensureListEqual("a = [\"a\"]; b = [\"b\"]; list c = a + b; c == [\"a\", \"b\"];", _c, ["a", "b"])
         self.ensureIntegerEqual("(1 - 1)", (rsub(1, 1)), 0)
         self.ensureFloatEqual("(1 - 0.5)", (rsub(bin2float('0.500000', '0000003f'), 1.0)), bin2float('0.500000', '0000003f'))
         self.ensureFloatEqual("(1.5 - 1)", (rsub(1.0, bin2float('1.500000', '0000c03f'))), bin2float('0.500000', '0000003f'))
@@ -283,41 +283,41 @@ class Script(BaseLSLScript):
         self.ensureRotationEqual("(<1.0, 2.0, 3.0, 4.0> / <5.0, 6.0, 7.0, 8.0>)", (rdiv(Quaternion((5.0, 6.0, 7.0, 8.0)), Quaternion((1.0, 2.0, 3.0, 4.0)))), Quaternion((-16.0, 0.0, -8.0, 70.0)))
         self.ensureIntegerEqual("(3 % 1)", (rmod(1, 3)), 0)
         self.ensureVectorEqual("(<1.0, 2.0, 3.0> % <4.0, 5.0, 6.0>)", (rmod(Vector((4.0, 5.0, 6.0)), Vector((1.0, 2.0, 3.0)))), Vector((-3.0, 6.0, -3.0)))
-        i = 1
-        self.ensureIntegerEqual("i = 1;", i, 1)
-        i = 1
-        i = radd(1, i)
-        self.ensureIntegerEqual("i = 1; i += 1;", i, 2)
-        i = 1
-        i = rsub(1, i)
-        self.ensureIntegerEqual("i = 1; i -= 1;", i, 0)
-        i = 2
-        i = rmul(2, i)
-        self.ensureIntegerEqual("i = 2; i *= 2;", i, 4)
-        i = 1
-        (i := typecast(rmul(bin2float('0.500000', '0000003f'), i), int))
-        self.ensureIntegerEqual("i = 1; i *= 0.5;", i, 0)
-        i = 2
-        i = rdiv(2, i)
-        self.ensureIntegerEqual("i = 2; i /= 2;", i, 1)
-        i = rdiv(-1, -2147483648)
-        self.ensureIntegerEqual("i = 0x80000000 / -1;", i, -2147483648)
-        i = 3
-        i = rmod(1, i)
-        self.ensureIntegerEqual("i = 3; i %= 1;", i, 0)
-        i = rmod(-1, -2147483648)
-        self.ensureIntegerEqual("i = 0x80000000 % -1;", i, 0)
-        i = 1
-        self.ensureIntegerEqual("postinc", rbooland((req(1, postincr(locals(), "i"))), (req(2, i))), 1)
-        i = 1
-        self.ensureIntegerEqual("preinc", rbooland((req(2, preincr(locals(), "i"))), (req(2, i))), 1)
-        i = 2
-        self.ensureIntegerEqual("postdec", rbooland((req(2, postdecr(locals(), "i"))), (req(1, i))), 1)
-        i = 2
-        self.ensureIntegerEqual("predec1", rbooland((req(1, predecr(locals(), "i"))), (req(1, i))), 1)
-        i = 2
-        i -= 1
-        self.ensureIntegerEqual("predec2", i, 1)
+        _i = 1
+        self.ensureIntegerEqual("i = 1;", _i, 1)
+        _i = 1
+        _i = radd(1, _i)
+        self.ensureIntegerEqual("i = 1; i += 1;", _i, 2)
+        _i = 1
+        _i = rsub(1, _i)
+        self.ensureIntegerEqual("i = 1; i -= 1;", _i, 0)
+        _i = 2
+        _i = rmul(2, _i)
+        self.ensureIntegerEqual("i = 2; i *= 2;", _i, 4)
+        _i = 1
+        (_i := typecast(rmul(bin2float('0.500000', '0000003f'), _i), int))
+        self.ensureIntegerEqual("i = 1; i *= 0.5;", _i, 0)
+        _i = 2
+        _i = rdiv(2, _i)
+        self.ensureIntegerEqual("i = 2; i /= 2;", _i, 1)
+        _i = rdiv(-1, -2147483648)
+        self.ensureIntegerEqual("i = 0x80000000 / -1;", _i, -2147483648)
+        _i = 3
+        _i = rmod(1, _i)
+        self.ensureIntegerEqual("i = 3; i %= 1;", _i, 0)
+        _i = rmod(-1, -2147483648)
+        self.ensureIntegerEqual("i = 0x80000000 % -1;", _i, 0)
+        _i = 1
+        self.ensureIntegerEqual("postinc", rbooland((req(1, postincr(locals(), "_i"))), (req(2, _i))), 1)
+        _i = 1
+        self.ensureIntegerEqual("preinc", rbooland((req(2, preincr(locals(), "_i"))), (req(2, _i))), 1)
+        _i = 2
+        self.ensureIntegerEqual("postdec", rbooland((req(2, postdecr(locals(), "_i"))), (req(1, _i))), 1)
+        _i = 2
+        self.ensureIntegerEqual("predec1", rbooland((req(1, predecr(locals(), "_i"))), (req(1, _i))), 1)
+        _i = 2
+        _i -= 1
+        self.ensureIntegerEqual("predec2", _i, 1)
         self.ensureFloatEqual("((float)2)", (2.0), 2.0)
         self.ensureStringEqual("((string)2)", (typecast(2, str)), "2")
         self.ensureIntegerEqual("((integer) 1.5)", (typecast(bin2float('1.500000', '0000c03f'), int)), 1)
@@ -330,29 +330,29 @@ class Script(BaseLSLScript):
         self.ensureStringEqual("((string) <1,2,3>)", (typecast(Vector((1.0, 2.0, 3.0)), str)), "<1.00000, 2.00000, 3.00000>")
         self.ensureStringEqual("((string) <1,2,3,4>)", (typecast(Quaternion((1.0, 2.0, 3.0, 4.0)), str)), "<1.00000, 2.00000, 3.00000, 4.00000>")
         self.ensureStringEqual("((string) [1,2.5,<1,2,3>])", (typecast([1, bin2float('2.500000', '00002040'), Vector((1.0, 2.0, 3.0))], str)), "12.500000<1.000000, 2.000000, 3.000000>")
-        i = 0
-        while cond(rless(10, i)):
-            i += 1
-        self.ensureIntegerEqual("i = 0; while(i < 10) ++i", i, 10)
-        i = 0
+        _i = 0
+        while cond(rless(10, _i)):
+            _i += 1
+        self.ensureIntegerEqual("i = 0; while(i < 10) ++i", _i, 10)
+        _i = 0
         while True == True:
-            i += 1
-            if not cond(rless(10, i)):
+            _i += 1
+            if not cond(rless(10, _i)):
                 break
-        self.ensureIntegerEqual("i = 0; do {++i;} while(i < 10);", i, 10)
-        i = 0
+        self.ensureIntegerEqual("i = 0; do {++i;} while(i < 10);", _i, 10)
+        _i = 0
         while True == True:
-            if not cond(rless(10, i)):
+            if not cond(rless(10, _i)):
                 break
             pass
-            i += 1
-        self.ensureIntegerEqual("for(i = 0; i < 10; ++i);", i, 10)
-        i = 1
-        goto .SkipAssign
+            _i += 1
+        self.ensureIntegerEqual("for(i = 0; i < 10; ++i);", _i, 10)
+        _i = 1
+        goto ._SkipAssign
         self.builtin_funcs.llSetText("Error", Vector((1.0, 0.0, 0.0)), 1.0)
-        i = 2
-        label .SkipAssign
-        self.ensureIntegerEqual("assignjump", i, 1)
+        _i = 2
+        label ._SkipAssign
+        self.ensureIntegerEqual("assignjump", _i, 1)
         self.ensureIntegerEqual("testReturn()", self.testReturn(), 1)
         self.ensureFloatEqual("testReturnFloat()", self.testReturnFloat(), 1.0)
         self.ensureStringEqual("testReturnString()", self.testReturnString(), "Test string")
@@ -363,8 +363,8 @@ class Script(BaseLSLScript):
         self.ensureVectorEqual("libveccall", self.testReturnVectorWithLibraryCall(), Vector((1.0, 2.0, 3.0)))
         self.ensureRotationEqual("librotcall", self.testReturnRotationWithLibraryCall(), Quaternion((1.0, 2.0, 3.0, 4.0)))
         self.ensureIntegerEqual("testParameters(1)", self.testParameters(1), 2)
-        i = 1
-        self.ensureIntegerEqual("i = 1; testParameters(i)", self.testParameters(i), 2)
+        _i = 1
+        self.ensureIntegerEqual("i = 1; testParameters(i)", self.testParameters(_i), 2)
         self.ensureIntegerEqual("testRecursion(10)", self.testRecursion(10), 0)
         self.ensureIntegerEqual("gInteger", self.gInteger, 5)
         self.ensureFloatEqual("gFloat", self.gFloat, bin2float('1.500000', '0000c03f'))
@@ -388,20 +388,20 @@ class Script(BaseLSLScript):
         self.ensureVectorEqual("-gVector = <-3,-3,-3>", neg(self.gVector), Vector((-3.0, -3.0, -3.0)))
         self.gRot = Quaternion((3.0, 3.0, 3.0, 3.0))
         self.ensureRotationEqual("-gRot = <-3,-3,-3,-3>", neg(self.gRot), Quaternion((-3.0, -3.0, -3.0, -3.0)))
-        v = Vector((0.0, 0.0, 0.0))
-        v = replace_coord_axis(v, 0, 3.0)
-        self.ensureFloatEqual("v.x", v[0], 3.0)
-        q = Quaternion((0.0, 0.0, 0.0, 1.0))
-        q = replace_coord_axis(q, 3, 5.0)
-        self.ensureFloatEqual("q.s", q[3], 5.0)
+        _v = Vector((0.0, 0.0, 0.0))
+        _v = replace_coord_axis(_v, 0, 3.0)
+        self.ensureFloatEqual("v.x", _v[0], 3.0)
+        _q = Quaternion((0.0, 0.0, 0.0, 1.0))
+        _q = replace_coord_axis(_q, 3, 5.0)
+        self.ensureFloatEqual("q.s", _q[3], 5.0)
         self.gVector = replace_coord_axis(self.gVector, 1, bin2float('17.500000', '00008c41'))
         self.ensureFloatEqual("gVector.y = 17.5", self.gVector[1], bin2float('17.500000', '00008c41'))
         self.gRot = replace_coord_axis(self.gRot, 2, bin2float('19.500000', '00009c41'))
         self.ensureFloatEqual("gRot.z = 19.5", self.gRot[2], bin2float('19.500000', '00009c41'))
-        l = typecast(5, list)
-        l2 = typecast(5, list)
-        self.ensureListEqual("leq1", l, l2)
-        self.ensureListEqual("leq2", l, [5])
+        _l = typecast(5, list)
+        _l2 = typecast(5, list)
+        self.ensureListEqual("leq1", _l, _l2)
+        self.ensureListEqual("leq2", _l, [5])
         self.ensureListEqual("leq3", [bin2float('1.500000', '0000c03f'), 6, Vector((1.0, 2.0, 3.0)), Quaternion((1.0, 2.0, 3.0, 4.0))], [bin2float('1.500000', '0000c03f'), 6, Vector((1.0, 2.0, 3.0)), Quaternion((1.0, 2.0, 3.0, 4.0))])
         self.ensureIntegerEqual("sesc1", self.builtin_funcs.llStringLength("\\"), 1)
         self.ensureIntegerEqual("sesc2", self.builtin_funcs.llStringLength("    "), 4)
@@ -417,11 +417,11 @@ class Script(BaseLSLScript):
         self.ensureFloatEqual("++gVector.z", preincr(self.__dict__, "gVector", 2), 4.0)
         self.gVector = Vector((1.0, 2.0, 3.0))
         self.ensureFloatEqual("gVector.z++", postincr(self.__dict__, "gVector", 2), 3.0)
-        self.ensureFloatEqual("(v.z = 6)", ((v := replace_coord_axis(v, 2, 6.0))[2]), 6.0)
-        v = Vector((1.0, 2.0, 3.0))
-        self.ensureFloatEqual("++v.z", preincr(locals(), "v", 2), 4.0)
-        v = Vector((1.0, 2.0, 3.0))
-        self.ensureFloatEqual("v.z++", postincr(locals(), "v", 2), 3.0)
+        self.ensureFloatEqual("(v.z = 6)", ((_v := replace_coord_axis(_v, 2, 6.0))[2]), 6.0)
+        _v = Vector((1.0, 2.0, 3.0))
+        self.ensureFloatEqual("++v.z", preincr(locals(), "_v", 2), 4.0)
+        _v = Vector((1.0, 2.0, 3.0))
+        self.ensureFloatEqual("v.z++", postincr(locals(), "_v", 2), 3.0)
 
     def runTests(self) -> None:
         self.gInteger = 5
