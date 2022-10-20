@@ -56,8 +56,13 @@ class PythonVisitor : public ASTVisitor {
   public:
   std::stringstream mStr;
   int mTabs = 0;
+  bool mSuppressNextTab = false;
 
   void doTabs() {
+    if (mSuppressNextTab) {
+        mSuppressNextTab = false;
+        return;
+    }
     for(int i=0; i<mTabs; ++i) {
       mStr << "    ";
     }

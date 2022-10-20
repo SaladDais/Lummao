@@ -626,13 +626,20 @@ bool PythonVisitor::visit(LSLIfStatement *if_stmt) {
     ScopedTabSetter tab_setter(this, mTabs + 1);
     if_stmt->getTrueBranch()->visit(this);
   }
+
   if(auto *false_branch = if_stmt->getFalseBranch()) {
     doTabs();
-    mStr << "else:\n";
-    {
-      ScopedTabSetter tab_setter(this, mTabs + 1);
-      false_branch->visit(this);
+    bool chained_if = false_branch->getNodeSubType() == NODE_IF_STATEMENT;
+    if (chained_if) {
+      mStr << "el";
+      // make the "if" branch's "if" merge into an "elif", no leading tab!
+      mSuppressNextTab = true;
+    } else {
+      mStr << "else:\n";
     }
+
+    ScopedTabSetter tab_setter(this, mTabs + (chained_if ? 0 : 1));
+    false_branch->visit(this);
   }
   return false;
 }
