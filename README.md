@@ -20,10 +20,8 @@ with an environment variable pointing to its location so Lummao can find it.
 * Create a new environment variable named `LSL_PYOPTIMIZER_PATH` and set its value to the the path you placed LSL-PyOptimizer in
 * Download <https://github.com/SaladDais/tailslide> and follow the compilation instructions, doing `make install` at the end
 * Download <https://github.com/SaladDais/Lummao>
-* `cmake .`
-* `make install`
-* `python setup.py develop`
-* You can now use `lummao something.lsl something.py` to transpile an LSL script to a Python script.
+* `pip install -e .`
+* You can now use `lummao` to transpile an LSL script to a Python script.
 * Hooray
 
 ## Why

@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+from setuptools.extension import Extension
+from wheel.bdist_wheel import bdist_wheel
+
+
+class BDistWheelABI3(bdist_wheel):
+    def get_tag(self):
+        python, abi, plat = super().get_tag()
+
+        if python.startswith("cp"):
+            # on CPython, our wheels are abi3 and compatible back to 3.6
+            return "cp38", "abi3", plat
+
+        return python, abi, plat
 
 
 def readme():
@@ -27,5 +40,15 @@ setup(
         "pytest",
         "pytest-cov"
     ],
-    test_suite="tests"
+    test_suite="tests",
+    cmdclass={"bdist_wheel": BDistWheelABI3},
+    ext_modules=[
+        Extension(
+            "lummao._compiler",
+            sources=["src/python_pass.cc", "src/compiler.cc"],
+            define_macros=[("Py_LIMITED_API", "0x03080000")],
+            libraries=["tailslide"],
+            py_limited_api=True,
+        )
+    ],
 )

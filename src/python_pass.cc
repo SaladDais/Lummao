@@ -1,72 +1,9 @@
 #include <cmath>
 #include <fstream>
 
-#include <tailslide/tailslide.hh>
-#include <tailslide/passes/desugaring.hh>
+#include "python_pass.hh"
 
 using namespace Tailslide;
-
-class PythonVisitor : public ASTVisitor {
-  protected:
-  void writeChildrenSep(LSLASTNode *parent, const char *separator);
-  void writeFloat(float f_val);
-  std::string getSymbolName(LSLSymbol *sym);
-
-  virtual bool visit(LSLScript *script);
-  virtual bool visit(LSLGlobalVariable *glob_var);
-  virtual bool visit(LSLGlobalFunction *glob_func);
-  virtual bool visit(LSLEventHandler *event_handler);
-  void visitFuncLike(LSLASTNode *func_like, LSLASTNode *body);
-
-  virtual bool visit(LSLIntegerConstant *int_const);
-  virtual bool visit(LSLFloatConstant *float_const);
-  virtual bool visit(LSLStringConstant *str_const);
-  virtual bool visit(LSLKeyConstant *key_const);
-  virtual bool visit(LSLVectorConstant *vec_const);
-  virtual bool visit(LSLQuaternionConstant *quat_const);
-  virtual bool visit(LSLVectorExpression *vec_expr);
-  virtual bool visit(LSLQuaternionExpression *quat_expr);
-  virtual bool visit(LSLListConstant *list_const);
-  virtual bool visit(LSLListExpression *list_expr);
-  virtual bool visit(LSLTypecastExpression *cast_expr);
-  virtual bool visit(LSLFunctionExpression *func_expr);
-  virtual bool visit(LSLLValueExpression *lvalue);
-  void constructMutatedMember(LSLSymbol *sym, LSLIdentifier *member, LSLExpression *rhs);
-  virtual bool visit(LSLBinaryExpression *bin_expr);
-  virtual bool visit(LSLUnaryExpression *unary_expr);
-  virtual bool visit(LSLPrintExpression *print_expr);
-  virtual bool visit(LSLParenthesisExpression *parens_expr);
-  virtual bool visit(LSLBoolConversionExpression *bool_expr);
-  virtual bool visit(LSLConstantExpression *const_expr) { return true; }
-
-  virtual bool visit(LSLNopStatement *nop_stmt);
-  virtual bool visit(LSLCompoundStatement *compound_stmt);
-  virtual bool visit(LSLExpressionStatement *expr_stmt);
-  virtual bool visit(LSLDeclaration *decl_stmt);
-  virtual bool visit(LSLIfStatement *if_stmt);
-  virtual bool visit(LSLForStatement *for_stmt);
-  virtual bool visit(LSLWhileStatement *while_stmt);
-  virtual bool visit(LSLDoStatement *do_stmt);
-  virtual bool visit(LSLJumpStatement *jump_stmt);
-  virtual bool visit(LSLLabel *label_stmt);
-  virtual bool visit(LSLReturnStatement *return_stmt);
-  void writeReturn(LSLExpression *ret_expr);
-  virtual bool visit(LSLStateStatement *state_stmt);
-
-  int _mFuncPreludeTabs = 0;
-  std::stringstream _mFuncPreludeStr;
-  LSLSymbol *_mFuncSym = nullptr;
-
-  public:
-  std::stringstream mStr;
-  int mTabs = 0;
-
-  void doTabs() {
-    for(int i=0; i<mTabs; ++i) {
-      mStr << "    ";
-    }
-  }
-};
 
 static const char * const PY_TYPE_NAMES[LST_MAX] {
   "None",
@@ -818,64 +755,4 @@ bool PythonVisitor::visit(LSLStateStatement *state_stmt) {
   doTabs();
   mStr << "raise StateChangeException('" << getSymbolName(state_stmt->getSymbol()) << "')\n";
   return false;
-}
-
-
-
-int main(int argc, char **argv) {
-  FILE *yyin = nullptr;
-
-  if (argc != 3) {
-    fprintf(stderr, "lummao <lsl_script> <out_py>\n");
-    return 1;
-  }
-
-  if (strcmp(argv[1], "-") != 0) {
-    yyin = fopen(argv[1], "r");
-    if (yyin == nullptr) {
-      fprintf(stderr, "couldn't open %s\n", argv[1]);
-      return 1;
-    }
-  }
-
-  tailslide_init_builtins(nullptr);
-  // set up the allocator and logger
-  ScopedScriptParser parser(nullptr);
-  Logger *logger = &parser.logger;
-
-  auto script = parser.parseLSL(yyin);
-  if (yyin != nullptr)
-    fclose(yyin);
-
-  if (script) {
-    script->collectSymbols();
-    script->determineTypes();
-    script->recalculateReferenceData();
-    script->propagateValues();
-    script->finalPass();
-
-    if (!logger->getErrors()) {
-      script->validateGlobals(true);
-      script->checkSymbols();
-    }
-  }
-  logger->report();
-
-  if (!logger->getErrors()) {
-    PythonVisitor py_visitor;
-    script->visit(&py_visitor);
-    std::string py_code {py_visitor.mStr.str()};
-    if (!strcmp(argv[2], "-")) {
-      fprintf(stdout, "%s", py_code.c_str());
-    } else {
-      std::ofstream py_out(argv[2], std::ios_base::binary | std::ios_base::out);
-      if (py_out.good()) {
-        py_out.write(py_code.c_str(), (int) py_code.size());
-      } else {
-        fprintf(stderr, "Couldn't open '%s'\n", argv[2]);
-        return 1;
-      }
-    }
-  }
-  return logger->getErrors();
 }

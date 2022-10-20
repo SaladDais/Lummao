@@ -11,3 +11,9 @@ dist/*
 .pytest_cache
 cmake-build-*
 .coverage*
+*.so
+*.dll
+*.dylib
+.tox
+coverage.xml
+.coverage

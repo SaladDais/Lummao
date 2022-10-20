@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: ["3.8", "3.10"]
@@ -24,7 +24,7 @@ jobs:
         pip install -r requirements-test.txt
 
         source ./bootstrap_ubuntu_ci.sh
-        python setup.py install
+        pip install -e .
 
         # Var was exported by `bootstrap_ubuntu_ci.sh`
         echo "LSL_PYOPTIMIZER_PATH=${LSL_PYOPTIMIZER_PATH}" >> $GITHUB_ENV

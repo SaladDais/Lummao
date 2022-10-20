@@ -22,10 +22,8 @@ from lslopt.lslfuncs import typecast, Quaternion, Vector, Key, cond, neg
 
 from .lslexecutils import *
 from .goto import with_goto, label, goto
-
-
-class CompilationError(Exception):
-    pass
+from .exceptions import CompileError
+import lummao._compiler as compiler_mod  # noqa
 
 
 def convert_script(lsl_contents: Union[str, bytes]) -> bytes:
@@ -34,12 +32,7 @@ def convert_script(lsl_contents: Union[str, bytes]) -> bytes:
         lsl_bytes = lsl_contents.encode("utf8")
     else:
         lsl_bytes = lsl_contents
-    from subprocess import Popen, PIPE
-    p = Popen(['lummao', '-', '-'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-    output, errors = p.communicate(input=lsl_bytes)
-    if p.returncode:
-        raise CompilationError((errors or b"").decode("utf8"))
-    return output
+    return compiler_mod.lsl_to_python_src(lsl_bytes)
 
 
 def convert_script_file(path) -> bytes:

@@ -16,13 +16,6 @@ sudo make -j2 install
 popd
 popd
 
-# Build and install lummao binary components
-mkdir build
-pushd build
-cmake ..
-sudo make install
-popd
-
 # Download and install LSL-PyOptimizer
 git clone https://github.com/Sei-Lisa/LSL-PyOptimizer.git pyoptimizer
 export "LSL_PYOPTIMIZER_PATH=$(pwd)/pyoptimizer"
