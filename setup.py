@@ -51,4 +51,9 @@ setup(
             py_limited_api=True,
         )
     ],
+    entry_points={
+        'console_scripts': {
+            'lummao = lummao.cli:cli_main',
+        }
+    },
 )
