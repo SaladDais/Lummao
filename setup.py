@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from wheel.bdist_wheel import bdist_wheel
 
@@ -31,7 +31,7 @@ setup(
     url='https://github.com/SaladDais/Lummao',
     author='Salad Dais',
     author_email='SaladDais@users.noreply.github.com',
-    packages=['lummao'],
+    packages=find_packages(include=['lummao', 'lummao.*']),
     data_files=[],
     install_requires=[],
     python_requires='>=3.8',

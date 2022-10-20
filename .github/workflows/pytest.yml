@@ -26,9 +26,6 @@ jobs:
         source ./bootstrap_ubuntu_ci.sh
         pip install -e .
 
-        # Var was exported by `bootstrap_ubuntu_ci.sh`
-        echo "LSL_PYOPTIMIZER_PATH=${LSL_PYOPTIMIZER_PATH}" >> $GITHUB_ENV
-
     - name: Run Flake8
       run: |
         flake8 .

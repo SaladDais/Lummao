@@ -23,7 +23,7 @@ import struct
 import sys
 from typing import List, Sequence, Tuple, Any, Optional, Dict, Callable
 
-from lslopt import lslfuncs, lslcommon
+from .vendor.lslopt import lslfuncs, lslcommon
 
 lslcommon.IsCalc = True
 

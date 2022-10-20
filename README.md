@@ -4,25 +4,34 @@
 It aims to ease testing of LSL code by leveraging Python's existing ecosystem for debugging and testing. Think of it as the less opinionated,
 stupider cousin of [LSLForge's unit testing framework](https://github.com/raysilent/lslforge/blob/master/lslforge/eclipse/lslforge/html/unit-test.html).
 
-It could conceivably be used for compile-time evaluation of pure functions with statically known arguments.
-
 The runtime is largely handled by the excellent implementation of LSL's basic operations and library functions
-from [LSL-PyOptimizer](https://github.com/Sei-Lisa/LSL-PyOptimizer).
+from Sei Lisa's [LSL-PyOptimizer](https://github.com/Sei-Lisa/LSL-PyOptimizer).
+See [vendor/lslopt](https://github.com/SaladDais/Lummao/tree/master/lummao/vendor/lslopt) for Lummao's vendored copy of LSL-Pyoptimizer.
 
 To see an example input script and its Python output, see the [`test_resources` directory](https://github.com/SaladDais/Lummao/tree/master/tests/test_resources).
 
 ## Setup
 
-LSL PyOptimizer is not distributed in a form that would allow easily using it as a library, it must be installed separately,
-with an environment variable pointing to its location so Lummao can find it.
+### Linux / Github Actions
 
-* Download <https://github.com/Sei-Lisa/LSL-PyOptimizer>
-* Create a new environment variable named `LSL_PYOPTIMIZER_PATH` and set its value to the the path you placed LSL-PyOptimizer in
+* `pip install lummao`
+
+### From source on Linux or OS X
+
 * Download <https://github.com/SaladDais/tailslide> and follow the compilation instructions, doing `make install` at the end
 * Download <https://github.com/SaladDais/Lummao>
 * `pip install -e .`
-* You can now use `lummao` to transpile an LSL script to a Python script.
-* Hooray
+
+### Windows
+
+Totally possible, but annoying. Wait until Windows packages are provided.
+
+## How
+
+For a real-world example, see <https://github.com/SaladDais/SLGraphPather>'s tests and test coverage reporting.
+
+Along with the python API, a helper `lummao` script is provided that takes in an LSL file and outputs a python file.
+It can be invoked like `lummao input.lsl output.py`.
 
 ## Why
 
@@ -32,15 +41,13 @@ scripts to Python, so you can mock LSL library functions and use Python debugger
 
 ## TODO
 
-* Use LSL-PyOptimizer's `lslparse` / `lsloutput` stuff rather than rely on native code for transpilation
-* * Just used Tailslide since it was easier for me to get started with it.
-* Symbol shadowing behavior is not correct
+* Symbol shadowing behavior is not correct. Python has very different shadowing rules.
 * The behavior of variables whose declarations are `jump`ed over is not correct
 * Provide mock helpers for: 
 * * inter-script communication
 * * HTTP
 * * auto-stubs for all functions
-* * state-aware event queueing (and state switching, for that matter)
+* * state-aware event queueing
 
 ## License
 
