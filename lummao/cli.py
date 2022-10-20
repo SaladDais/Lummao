@@ -19,7 +19,7 @@ def cli_main():
     if sys.argv[2] == "-":
         sys.stdout.buffer.write(converted)
     else:
-        with open(sys.argv[1], "wb") as f:
+        with open(sys.argv[2], "wb") as f:
             f.write(converted)
 
 
