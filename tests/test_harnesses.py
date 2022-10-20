@@ -3,6 +3,7 @@ import pathlib
 import unittest
 
 import lummao
+from lummao import DetectedDetails
 
 BASE_PATH = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 RESOURCES_PATH = BASE_PATH / "test_resources"
@@ -55,6 +56,15 @@ class HarnessTestCase(unittest.TestCase):
         script.builtin_funcs["llOwnerSay"] = _mutate_global
         script.edefaultstate_entry()
         self.assertEqual(script.gFoo, 1)
+
+    def test_detected_function_wrappers(self):
+        script = self._compile_script_filename("detected_touch.lsl")
+        logged_names = []
+
+        script.builtin_funcs["llOwnerSay"] = logged_names.append
+        script.queue_event("touch_start", (1,), [DetectedDetails(Name="foobar")])
+        script.execute()
+        self.assertListEqual(["foobar", ""], logged_names)
 
 
 if __name__ == '__main__':

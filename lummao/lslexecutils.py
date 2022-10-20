@@ -19,8 +19,10 @@ expression eval order
 """
 import binascii
 import ctypes
+import dataclasses
 import struct
 import sys
+import uuid
 from typing import List, Sequence, Tuple, Any, Optional, Dict, Callable
 
 from .vendor.lslopt import lslfuncs, lslcommon
@@ -194,11 +196,31 @@ class CallableCollection(Dict[str, Callable]):
         return self[item]
 
 
+@dataclasses.dataclass
+class DetectedDetails:
+    Key: lslcommon.Key = lslcommon.Key(uuid.UUID(int=0))
+    Owner: lslcommon.Key = lslcommon.Key(uuid.UUID(int=0))
+    Group: lslcommon.Key = lslcommon.Key(uuid.UUID(int=0))
+    Name: str = ""
+    Pos: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
+    Vel: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
+    Rot: lslcommon.Quaternion = dataclasses.field(default_factory=lambda: lslcommon.Quaternion((0, 0, 0, 1)))
+    LinkNumber: int = 0
+    TouchFace: int = 0
+    Type: int = 0
+    TouchNormal: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
+    TouchBinormal: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
+    TouchPos: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
+    TouchST: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
+    TouchUV: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
+
+
 class BaseLSLScript:
     def __init__(self):
         self.current_state: str = "default"
         self.next_state: Optional[str] = None
-        self.event_queue: List[Tuple[str, Sequence[Any]]] = [("state_entry", ())]
+        self.detected_stack: List[DetectedDetails] = []
+        self.event_queue: List[Tuple[str, Sequence[Any], List[DetectedDetails]]] = [("state_entry", (), [])]
         self.builtin_funcs: CallableCollection = CallableCollection()
         # Stuff all the builtins we have functions for into a big ol dict where they can be replaced
         for func_name in dir(lslfuncs):
@@ -208,30 +230,48 @@ class BaseLSLScript:
             if not callable(val):
                 continue
             self.builtin_funcs[func_name] = val
+        # Patch llDetected* builtins so that they return details related to the current event
+        for field in dataclasses.fields(DetectedDetails):
+            self.builtin_funcs['llDetected' + field.name] = self._make_detected_wrapper(field.name)
 
-    def queue_event(self, event_name: str, args: Sequence[Any]):
-        self.event_queue.append((event_name, args))
+    def _make_detected_wrapper(self, detected_name: str) -> Callable[[int], Any]:
+        def _wrapper(num: int):
+            try:
+                details = self.detected_stack[num]
+            except IndexError:
+                details = DetectedDetails()
+            return getattr(details, detected_name)
+        return _wrapper
 
-    def _trigger_event_handler(self, name: str, *args):
+    def queue_event(
+            self,
+            event_name: str,
+            args: Sequence[Any],
+            detected_stack: Optional[List[DetectedDetails]] = None
+    ):
+        self.event_queue.append((event_name, args, detected_stack or []))
+
+    def _trigger_event_handler(self, name: str, *args, detected_stack):
         # TODO: need extras for things like llDetectedKey(num)
         func = getattr(self, f"e{self.current_state}{name}", None)
         if func is not None:
+            self.detected_stack = detected_stack
             func(*args)
 
     def execute_one(self):
-        event, event_args = self.event_queue.pop(0)
+        event, event_args, detected_stack = self.event_queue.pop(0)
         try:
-            self._trigger_event_handler(event, *event_args)
+            self._trigger_event_handler(event, *event_args, detected_stack=detected_stack)
             # TODO: Check this is correct, is changing state in state_exit possible?
             if event == "state_exit":
                 # Need to queue a state_entry for the new state
                 self.current_state = self.next_state
-                self.event_queue.append(("state_entry", ()))
+                self.event_queue.append(("state_entry", (), []))
 
         except StateChangeException as e:
             self.next_state = e.new_state
             self.event_queue.clear()
-            self.event_queue.append(("state_exit", ()))
+            self.event_queue.append(("state_exit", (), []))
 
     def execute(self):
         while self.event_queue:
