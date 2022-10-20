@@ -141,14 +141,13 @@ def prepostincrdecr(sym_scope, sym_name, mod_amount, post, member_idx, frame):
     Post-increment in particular doesn't exist in python, so we fake it.
     """
     sym_val = sym_scope[sym_name]
-    # TODO: oops, should specifically check for `None`.
-    if member_idx:
+    if member_idx is not None:
         orig_val = sym_val[member_idx]
     else:
         orig_val = sym_val
     new_val = radd(orig_val, mod_amount)
 
-    if member_idx:
+    if member_idx is not None:
         new_sym_val = replace_coord_axis(sym_val, member_idx, sym_val[member_idx] + mod_amount)
     else:
         new_sym_val = new_val
