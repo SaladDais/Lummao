@@ -23,7 +23,7 @@ def readme():
 
 setup(
     name='lummao',
-    version='0.0.4',
+    version='0.1.0',
     license='GPLv3',
     description='Toolkit for compiling and executing the Linden Scripting Language as Python',
     long_description=readme(),
