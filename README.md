@@ -12,7 +12,10 @@ To see an example input script and its Python output, see the [`test_resources` 
 
 ## Setup
 
-* `pip install lummao`
+```bash
+pip install --upgrade pip
+pip install lummao
+```
 
 ### From source
 
