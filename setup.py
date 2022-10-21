@@ -62,6 +62,7 @@ setup(
             libraries=["tailslide"],
             library_dirs=library_dirs,
             include_dirs=include_dirs,
+            extra_compile_args=["-std=c++17"],
             py_limited_api=True,
         )
     ],
