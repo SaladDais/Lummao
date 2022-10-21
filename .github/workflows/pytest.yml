@@ -37,50 +37,50 @@ jobs:
       run: |
         pytest --cov=./lummao --cov=./tests --cov-report=xml
 
-  windows:
-    needs: linux
-    runs-on: windows-2022
-
-    steps:
-    - run: git config --global core.autocrlf false
-    - uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.10"
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip autobuild
-        autobuild install -A64 tailslide
-        pip install -r requirements-test.txt
-        pip install -e .
-
-    - name: Test with pytest
-      run: |
-        pytest --cov=./lummao --cov=./tests --cov-report=xml
-
-
-  macos:
-    needs: windows
-    runs-on: macos-11
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.10"
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip autobuild
-        autobuild install -A64 tailslide
-        pip install -r requirements-test.txt
-        pip install -e .
-
-    - name: Test with pytest
-      run: |
-        pytest --cov=./lummao --cov=./tests --cov-report=xml
+#  windows:
+#    needs: linux
+#    runs-on: windows-2022
+#
+#    steps:
+#    - run: git config --global core.autocrlf false
+#    - uses: actions/checkout@v2
+#
+#    - name: Set up Python
+#      uses: actions/setup-python@v2
+#      with:
+#        python-version: "3.10"
+#
+#    - name: Install dependencies
+#      run: |
+#        python -m pip install --upgrade pip autobuild
+#        autobuild install -A64 tailslide
+#        pip install -r requirements-test.txt
+#        pip install -e .
+#
+#    - name: Test with pytest
+#      run: |
+#        pytest --cov=./lummao --cov=./tests --cov-report=xml
+#
+#
+#  macos:
+#    needs: windows
+#    runs-on: macos-11
+#
+#    steps:
+#    - uses: actions/checkout@v2
+#
+#    - name: Set up Python
+#      uses: actions/setup-python@v2
+#      with:
+#        python-version: "3.10"
+#
+#    - name: Install dependencies
+#      run: |
+#        python -m pip install --upgrade pip autobuild
+#        autobuild install -A64 tailslide
+#        pip install -r requirements-test.txt
+#        pip install -e .
+#
+#    - name: Test with pytest
+#      run: |
+#        pytest --cov=./lummao --cov=./tests --cov-report=xml
