@@ -5,3 +5,4 @@ include LICENSE
 # These need to be included in sdists to satisfy license requirements
 include lummao/vendor/lslopt/COPYING
 include lummao/vendor/lslopt/README.md
+include autobuild.xml
