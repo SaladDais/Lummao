@@ -42,6 +42,7 @@ jobs:
     runs-on: windows-2022
 
     steps:
+    - run: git config --global core.autocrlf false
     - uses: actions/checkout@v2
 
     - name: Set up Python
