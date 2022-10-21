@@ -12,19 +12,13 @@ To see an example input script and its Python output, see the [`test_resources` 
 
 ## Setup
 
-### Linux / Github Actions
-
 * `pip install lummao`
 
-### From source on Linux or OS X
+### From source
 
 * Download <https://github.com/SaladDais/tailslide> and follow the compilation instructions, doing `make install` at the end
 * Download <https://github.com/SaladDais/Lummao>
 * `pip install -e .`
-
-### Windows
-
-Totally possible, but annoying. Wait until Windows packages are provided.
 
 ## How
 
@@ -42,7 +36,6 @@ scripts to Python, so you can mock LSL library functions and use Python debugger
 ## TODO
 
 * Symbol shadowing behavior is not correct. Python has very different shadowing rules.
-* The behavior of variables whose declarations are `jump`ed over is not correct
 * Provide mock helpers for: 
 * * inter-script communication
 * * HTTP

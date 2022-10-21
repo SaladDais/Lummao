@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import os.path
+import sys
 
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
@@ -21,9 +23,17 @@ def readme():
         return f.read()
 
 
+if os.path.exists("build/packages/include"):
+    library_dirs = ["build/packages/lib/release"]
+    include_dirs = ["build/packages/include"]
+else:
+    print("Autobuild packages not found, relying on system Tailslide", file=sys.stderr)
+    library_dirs = None
+    include_dirs = None
+
+
 setup(
     name='lummao',
-    version='0.1.3',
     license='GPLv3',
     description='Toolkit for compiling and executing the Linden Scripting Language as Python',
     long_description=readme(),
@@ -36,6 +46,8 @@ setup(
     install_requires=[],
     python_requires='>=3.8',
     zip_safe=False,
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     tests_require=[
         "pytest",
         "pytest-cov"
@@ -48,6 +60,8 @@ setup(
             sources=["src/python_pass.cc", "src/compiler.cc"],
             define_macros=[("Py_LIMITED_API", "0x03080000")],
             libraries=["tailslide"],
+            library_dirs=library_dirs,
+            include_dirs=include_dirs,
             py_limited_api=True,
         )
     ],
