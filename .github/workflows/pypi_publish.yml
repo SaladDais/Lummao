@@ -47,6 +47,20 @@ jobs:
         rm -rf dist/*.whl
         mv wheelhouse/* dist/
 
+    - uses: actions/upload-artifact@v3
+      with:
+        path: |
+          dist/*.tar.gz
+          dist/*.whl
+
+  publish:
+    needs: "build"
+    runs-on: "ubuntu-20.04"
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: artifact
+        path: dist
     # We do this, since failures on test.pypi aren't that bad
     - name: Publish to Test PyPI
       if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
