@@ -17,9 +17,11 @@
 Wrappers for PyOptimizer's eval functionality, with reversed argument order for correct LSL
 expression eval order
 """
+import asyncio
 import binascii
 import ctypes
 import dataclasses
+import functools
 import struct
 import sys
 import uuid
@@ -191,9 +193,28 @@ class StateChangeException(Exception):
         self.new_state = new_state
 
 
+def _make_async(func):
+    """Make a normally synchronous function `await`able"""
+    if asyncio.iscoroutinefunction(func):
+        return func
+
+    @functools.wraps(func)
+    async def _wrapper(*args, **kwargs):
+        val = func(*args, **kwargs)
+        if asyncio.iscoroutine(val) or asyncio.isfuture(val):
+            return await val
+        return val
+    return _wrapper
+
+
 class CallableCollection(Dict[str, Callable]):
     def __getattr__(self, item):
-        return self[item]
+        # All function calls in Lummao need to be async, but most of the
+        # builtin functions are not actually implemented as coroutines.
+        # Wrap everything that comes out of this collection through the `.`
+        # accessor in a coroutine that makes it `await`able if it's not
+        # already a coroutine.
+        return _make_async(self[item])
 
 
 @dataclasses.dataclass
@@ -213,6 +234,7 @@ class DetectedDetails:
     TouchPos: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
     TouchST: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
     TouchUV: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
+    Grab: lslcommon.Vector = dataclasses.field(default_factory=lambda: lslcommon.Vector((0, 0, 0)))
 
 
 class BaseLSLScript:
@@ -251,17 +273,17 @@ class BaseLSLScript:
     ):
         self.event_queue.append((event_name, args, detected_stack or []))
 
-    def _trigger_event_handler(self, name: str, *args, detected_stack):
+    async def _trigger_event_handler(self, name: str, *args, detected_stack):
         # TODO: need extras for things like llDetectedKey(num)
         func = getattr(self, f"e{self.current_state}{name}", None)
         if func is not None:
             self.detected_stack = detected_stack
-            func(*args)
+            await func(*args)
 
-    def execute_one(self):
+    async def execute_one(self):
         event, event_args, detected_stack = self.event_queue.pop(0)
         try:
-            self._trigger_event_handler(event, *event_args, detected_stack=detected_stack)
+            await self._trigger_event_handler(event, *event_args, detected_stack=detected_stack)
             # TODO: Check this is correct, is changing state in state_exit possible?
             if event == "state_exit":
                 # Need to queue a state_entry for the new state
@@ -273,6 +295,6 @@ class BaseLSLScript:
             self.event_queue.clear()
             self.event_queue.append(("state_exit", (), []))
 
-    def execute(self):
+    async def execute(self):
         while self.event_queue:
-            self.execute_one()
+            await self.execute_one()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import asyncio
 import sys
 from subprocess import Popen, PIPE
 
@@ -26,15 +26,15 @@ class ShelLSLWrapper:
         self.script.argc = len(new_argv)
         self.script.argv = new_argv
 
-    def execute(self):
-        self.script.execute()
+    async def execute(self):
+        await self.script.execute()
 
-    def _system_wrapper(self, command: str):
+    async def _system_wrapper(self, command: str):
         p = Popen(command, shell=True)
         p.wait()
         self.script.cashquery = p.returncode
 
-    def _exec_wrapper(self, command: list):
+    async def _exec_wrapper(self, command: list):
         p = Popen(command, stdout=PIPE, stdin=PIPE)
         stdout, stderr = p.communicate()
         if stderr:
@@ -43,18 +43,17 @@ class ShelLSLWrapper:
         return stdout.decode("utf8").rstrip("\n")
 
 
-def main():
-    lummao.lslfuncs.llOwnerSay = print
-
+async def main():
     with open(sys.argv[1], "rb") as f:
         lsl_bytes = f.read()
     # strip shebang if present
     if lsl_bytes.startswith(b"#!"):
         lsl_bytes = b"\n".join(lsl_bytes.split(b"\n")[1:])
     script = lummao.compile_script(LSL_HEADER + lsl_bytes)
+    script.builtin_funcs["llOwnerSay"] = print
     wrapped = ShelLSLWrapper(script, sys.argv[1:])
-    wrapped.execute()
+    await wrapped.execute()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

@@ -1,6 +1,5 @@
 import os.path
 import pathlib
-from subprocess import Popen, PIPE
 import unittest
 
 import lummao

@@ -159,7 +159,7 @@ bool PythonVisitor::visit(LSLGlobalFunction *glob_func) {
     mStr << "@with_goto\n";
   }
   doTabs();
-  mStr << "def " << getSymbolName(func_sym) << "(self";
+  mStr << "async def " << getSymbolName(func_sym) << "(self";
   for (auto *arg : *glob_func->getArguments()) {
     auto *arg_sym = arg->getSymbol();
     mStr << ", " << getSymbolName(arg_sym) << ": " << PY_TYPE_NAMES[arg_sym->getIType()];
@@ -178,7 +178,7 @@ bool PythonVisitor::visit(LSLEventHandler *event_handler) {
     mStr << "@with_goto\n";
   }
   doTabs();
-  mStr << "def e" << getSymbolName(state_sym) << id->getName() << "(self";
+  mStr << "async def e" << getSymbolName(state_sym) << id->getName() << "(self";
   for (auto *arg : *event_handler->getArguments()) {
     auto *arg_sym = arg->getSymbol();
     mStr << ", " << getSymbolName(arg_sym) << ": " << PY_TYPE_NAMES[arg_sym->getIType()];
@@ -309,10 +309,9 @@ bool PythonVisitor::visit(LSLListExpression *list_expr) {
 
 bool PythonVisitor::visit(LSLFunctionExpression *func_expr) {
   auto *sym = func_expr->getSymbol();
+  mStr << "await self.";
   if (sym->getSubType() == SYM_BUILTIN) {
-    mStr << "self.builtin_funcs.";
-  } else {
-    mStr << "self.";
+    mStr << "builtin_funcs.";
   }
   mStr << getSymbolName(sym) << "(";
   for (auto *arg : *func_expr->getArguments()) {

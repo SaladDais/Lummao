@@ -15,6 +15,14 @@ default {
             }
         } else {
             ++gRequests;
+            string path = llGetHTTPHeader(id, "x-path-info");
+            if (path == "/timeout")
+                return;
+
+            if (path == "/lazy") {
+                llSleep(5.0);
+            }
+
             list headerList = ["x-script-url", "x-path-info", "x-query-string", "x-remote-ip", "user-agent"];
 
             integer index = -llGetListLength(headerList);
@@ -25,6 +33,10 @@ default {
 
             llOwnerSay("body:\n" + body);
             llHTTPResponse(id, 200, "I live at " + gURL + " and I've served " + (string)gRequests + " requests!");
+
+            if (path == "/lazy_after")
+                llSleep(5.0);
+            llOwnerSay("Finished " + (string)id);
         }
     }
 }
