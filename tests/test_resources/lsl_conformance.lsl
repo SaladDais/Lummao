@@ -655,6 +655,13 @@ tests()
     ensureFloatEqual("++v.z", ++v.z, 4);
     v = <1, 2, 3>;
     ensureFloatEqual("v.z++", v.z++, 3);
+
+    // infinity representation
+    ensureFloatEqual("posinf == posinf", 2.0e+9999, 2.0e+99999);
+    ensureFloatEqual("neginf == neginf", -2.0e+9999, -2.0e+99999);
+    ensureFalse("posinf != neginf", 2.0e+9999 == -2.0e+9999);
+    ensureStringEqual("(string)posinf == 'Infinity'", (string)2.0e+9999, "Infinity");
+    ensureStringEqual("(string)neginf == '-Infinity'", (string)-2.0e+9999, "-Infinity");
 }
 
 runTests()

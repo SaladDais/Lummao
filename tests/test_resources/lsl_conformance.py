@@ -17,7 +17,7 @@ class Script(BaseLSLScript):
         self.gTestsPassed = 0
         self.gTestsFailed = 0
         self.gInteger = 5
-        self.gFloat = bin2float('1.500000', '0000c03f')
+        self.gFloat = 1.5
         self.gString = "foo"
         self.gVector = Vector((1.0, 2.0, 3.0))
         self.gRot = Quaternion((1.0, 2.0, 3.0, 4.0))
@@ -52,7 +52,7 @@ class Script(BaseLSLScript):
 
     async def floatEqual(self, _actual: float, _expected: float) -> int:
         _error: float = await self.builtin_funcs.llFabs(rsub(_actual, _expected))
-        _epsilon: float = bin2float('0.001000', '6f12833a')
+        _epsilon: float = 0.001
         if cond(rgreater(_epsilon, _error)):
             print(radd(typecast(_error, str), "Float equality delta "))
             return 0
@@ -150,11 +150,11 @@ class Script(BaseLSLScript):
             await self.testFailed("if(0.0)", "TRUE", "FALSE")
         else:
             await self.testPassed("if(0.0)", "TRUE", "TRUE")
-        if cond(bin2float('0.000001', 'bd378635')):
+        if cond(0.000001):
             await self.testPassed("if(0.000001)", "TRUE", "TRUE")
         else:
             await self.testFailed("if(0.000001)", "TRUE", "FALSE")
-        if cond(bin2float('0.900000', '6666663f')):
+        if cond(0.9):
             await self.testPassed("if(0.9)", "TRUE", "TRUE")
         else:
             await self.testFailed("if(0.9)", "TRUE", "FALSE")
@@ -229,14 +229,14 @@ class Script(BaseLSLScript):
         await self.ensureIntegerEqual("(523 >> 2)", (rshr(2, 523)), 130)
         await self.ensureIntegerEqual("(523 << 2)", (rshl(2, 523)), 2092)
         await self.ensureIntegerEqual("(1 + 1)", (radd(1, 1)), 2)
-        await self.ensureFloatEqual("(1 + 1.1)", (radd(bin2float('1.100000', 'cdcc8c3f'), 1.0)), bin2float('2.100000', '66660640'))
-        await self.ensureFloatEqual("(1.1 + 1)", (radd(1.0, bin2float('1.100000', 'cdcc8c3f'))), bin2float('2.100000', '66660640'))
-        await self.ensureFloatEqual("(1.1 + 1.1)", (radd(bin2float('1.100000', 'cdcc8c3f'), bin2float('1.100000', 'cdcc8c3f'))), bin2float('2.200000', 'cdcc0c40'))
+        await self.ensureFloatEqual("(1 + 1.1)", (radd(1.1, 1.0)), 2.1)
+        await self.ensureFloatEqual("(1.1 + 1)", (radd(1.0, 1.1)), 2.1)
+        await self.ensureFloatEqual("(1.1 + 1.1)", (radd(1.1, 1.1)), 2.2)
         await self.ensureStringEqual("\"foo\" + \"bar\"", radd("bar", "foo"), "foobar")
-        await self.ensureVectorEqual("(<1.1, 2.2, 3.3> + <4.4, 5.5, 6.6>)", (radd(Vector((bin2float('4.400000', 'cdcc8c40'), bin2float('5.500000', '0000b040'), bin2float('6.600000', '3333d340'))), Vector((bin2float('1.100000', 'cdcc8c3f'), bin2float('2.200000', 'cdcc0c40'), bin2float('3.300000', '33335340'))))), Vector((bin2float('5.500000', '0000b040'), bin2float('7.700000', '6666f640'), bin2float('9.900000', '66661e41'))))
-        await self.ensureRotationEqual("(<1.1, 2.2, 3.3, 4.4> + <4.4, 5.5, 6.6, 3.3>)", (radd(Quaternion((bin2float('4.400000', 'cdcc8c40'), bin2float('5.500000', '0000b040'), bin2float('6.600000', '3333d340'), bin2float('3.300000', '33335340'))), Quaternion((bin2float('1.100000', 'cdcc8c3f'), bin2float('2.200000', 'cdcc0c40'), bin2float('3.300000', '33335340'), bin2float('4.400000', 'cdcc8c40'))))), Quaternion((bin2float('5.500000', '0000b040'), bin2float('7.700000', '6666f640'), bin2float('9.900000', '66661e41'), bin2float('7.700000', '6666f640'))))
+        await self.ensureVectorEqual("(<1.1, 2.2, 3.3> + <4.4, 5.5, 6.6>)", (radd(Vector((4.4, 5.5, 6.6)), Vector((1.1, 2.2, 3.3)))), Vector((5.5, 7.7, 9.9)))
+        await self.ensureRotationEqual("(<1.1, 2.2, 3.3, 4.4> + <4.4, 5.5, 6.6, 3.3>)", (radd(Quaternion((4.4, 5.5, 6.6, 3.3)), Quaternion((1.1, 2.2, 3.3, 4.4)))), Quaternion((5.5, 7.7, 9.9, 7.7)))
         await self.ensureListEqual("([1] + 2)", (radd(2, [1])), [1, 2])
-        await self.ensureListEqual("([] + 1.5)", (radd(bin2float('1.500000', '0000c03f'), [])), [bin2float('1.500000', '0000c03f')])
+        await self.ensureListEqual("([] + 1.5)", (radd(1.5, [])), [1.5])
         await self.ensureListEqual("([\"foo\"] + \"bar\")", (radd("bar", ["foo"])), ["foo", "bar"])
         await self.ensureListEqual("([] + <1,2,3>)", (radd(Vector((1.0, 2.0, 3.0)), [])), [Vector((1.0, 2.0, 3.0))])
         await self.ensureListEqual("([] + <1,2,3,4>)", (radd(Quaternion((1.0, 2.0, 3.0, 4.0)), [])), [Quaternion((1.0, 2.0, 3.0, 4.0))])
@@ -257,29 +257,29 @@ class Script(BaseLSLScript):
         await self.ensureListEqual("a = [\"a\"]; b = [\"b\"]; list c = a + b; b == [\"b\"];", _b, ["b"])
         await self.ensureListEqual("a = [\"a\"]; b = [\"b\"]; list c = a + b; c == [\"a\", \"b\"];", _c, ["a", "b"])
         await self.ensureIntegerEqual("(1 - 1)", (rsub(1, 1)), 0)
-        await self.ensureFloatEqual("(1 - 0.5)", (rsub(bin2float('0.500000', '0000003f'), 1.0)), bin2float('0.500000', '0000003f'))
-        await self.ensureFloatEqual("(1.5 - 1)", (rsub(1.0, bin2float('1.500000', '0000c03f'))), bin2float('0.500000', '0000003f'))
-        await self.ensureFloatEqual("(2.2 - 1.1)", (rsub(bin2float('1.100000', 'cdcc8c3f'), bin2float('2.200000', 'cdcc0c40'))), bin2float('1.100000', 'cdcc8c3f'))
-        await self.ensureVectorEqual("(<1.5, 2.5, 3.5> - <4.5, 5.5, 6.5>)", (rsub(Vector((bin2float('4.500000', '00009040'), bin2float('5.500000', '0000b040'), bin2float('6.500000', '0000d040'))), Vector((bin2float('1.500000', '0000c03f'), bin2float('2.500000', '00002040'), bin2float('3.500000', '00006040'))))), Vector((-3.0, -3.0, -3.0)))
-        await self.ensureRotationEqual("(<1.5, 2.5, 3.5, 4.5> - <4.5, 5.5, 6.5, 7.5>)", (rsub(Quaternion((bin2float('4.500000', '00009040'), bin2float('5.500000', '0000b040'), bin2float('6.500000', '0000d040'), bin2float('7.500000', '0000f040'))), Quaternion((bin2float('1.500000', '0000c03f'), bin2float('2.500000', '00002040'), bin2float('3.500000', '00006040'), bin2float('4.500000', '00009040'))))), Quaternion((-3.0, -3.0, -3.0, -3.0)))
+        await self.ensureFloatEqual("(1 - 0.5)", (rsub(0.5, 1.0)), 0.5)
+        await self.ensureFloatEqual("(1.5 - 1)", (rsub(1.0, 1.5)), 0.5)
+        await self.ensureFloatEqual("(2.2 - 1.1)", (rsub(1.1, 2.2)), 1.1)
+        await self.ensureVectorEqual("(<1.5, 2.5, 3.5> - <4.5, 5.5, 6.5>)", (rsub(Vector((4.5, 5.5, 6.5)), Vector((1.5, 2.5, 3.5)))), Vector((-3.0, -3.0, -3.0)))
+        await self.ensureRotationEqual("(<1.5, 2.5, 3.5, 4.5> - <4.5, 5.5, 6.5, 7.5>)", (rsub(Quaternion((4.5, 5.5, 6.5, 7.5)), Quaternion((1.5, 2.5, 3.5, 4.5)))), Quaternion((-3.0, -3.0, -3.0, -3.0)))
         await self.ensureIntegerEqual("(2 * 3)", (rmul(3, 2)), 6)
-        await self.ensureFloatEqual("(2 * 3.5)", (rmul(bin2float('3.500000', '00006040'), 2.0)), 7.0)
-        await self.ensureFloatEqual("(2.5 * 3)", (rmul(3.0, bin2float('2.500000', '00002040'))), bin2float('7.500000', '0000f040'))
-        await self.ensureFloatEqual("(2.5 * 3.5)", (rmul(bin2float('3.500000', '00006040'), bin2float('2.500000', '00002040'))), bin2float('8.750000', '00000c41'))
-        await self.ensureVectorEqual("(<1.1, 2.2, 3.3> * 2)", (rmul(2.0, Vector((bin2float('1.100000', 'cdcc8c3f'), bin2float('2.200000', 'cdcc0c40'), bin2float('3.300000', '33335340'))))), Vector((bin2float('2.200000', 'cdcc0c40'), bin2float('4.400000', 'cdcc8c40'), bin2float('6.600000', '3333d340'))))
-        await self.ensureVectorEqual("(2 * <1.1, 2.2, 3.3>)", (rmul(2.0, Vector((bin2float('1.100000', 'cdcc8c3f'), bin2float('2.200000', 'cdcc0c40'), bin2float('3.300000', '33335340'))))), (rmul(Vector((bin2float('1.100000', 'cdcc8c3f'), bin2float('2.200000', 'cdcc0c40'), bin2float('3.300000', '33335340'))), 2.0)))
-        await self.ensureVectorEqual("(<2.2, 4.4, 6.6> * 2.0)", (rmul(2.0, Vector((bin2float('2.200000', 'cdcc0c40'), bin2float('4.400000', 'cdcc8c40'), bin2float('6.600000', '3333d340'))))), Vector((bin2float('4.400000', 'cdcc8c40'), bin2float('8.800000', 'cdcc0c41'), bin2float('13.200000', '33335341'))))
-        await self.ensureVectorEqual("(2.0 * <2.2, 4.4, 6.6>)", (rmul(2.0, Vector((bin2float('2.200000', 'cdcc0c40'), bin2float('4.400000', 'cdcc8c40'), bin2float('6.600000', '3333d340'))))), (rmul(Vector((bin2float('2.200000', 'cdcc0c40'), bin2float('4.400000', 'cdcc8c40'), bin2float('6.600000', '3333d340'))), 2.0)))
+        await self.ensureFloatEqual("(2 * 3.5)", (rmul(3.5, 2.0)), 7.0)
+        await self.ensureFloatEqual("(2.5 * 3)", (rmul(3.0, 2.5)), 7.5)
+        await self.ensureFloatEqual("(2.5 * 3.5)", (rmul(3.5, 2.5)), 8.75)
+        await self.ensureVectorEqual("(<1.1, 2.2, 3.3> * 2)", (rmul(2.0, Vector((1.1, 2.2, 3.3)))), Vector((2.2, 4.4, 6.6)))
+        await self.ensureVectorEqual("(2 * <1.1, 2.2, 3.3>)", (rmul(2.0, Vector((1.1, 2.2, 3.3)))), (rmul(Vector((1.1, 2.2, 3.3)), 2.0)))
+        await self.ensureVectorEqual("(<2.2, 4.4, 6.6> * 2.0)", (rmul(2.0, Vector((2.2, 4.4, 6.6)))), Vector((4.4, 8.8, 13.2)))
+        await self.ensureVectorEqual("(2.0 * <2.2, 4.4, 6.6>)", (rmul(2.0, Vector((2.2, 4.4, 6.6)))), (rmul(Vector((2.2, 4.4, 6.6)), 2.0)))
         await self.ensureFloatEqual("<1,3,-5> * <4,-2,-1>", rmul(Vector((4.0, -2.0, -1.0)), Vector((1.0, 3.0, -5.0))), 3.0)
-        await self.ensureVectorEqual("<-1,0,0> * <0, 0, 0.707, 0.707>", rmul(Quaternion((0.0, 0.0, bin2float('0.707000', 'f4fd343f'), bin2float('0.707000', 'f4fd343f'))), Vector((-1.0, 0.0, 0.0))), Vector((0.0, -1.0, 0.0)))
+        await self.ensureVectorEqual("<-1,0,0> * <0, 0, 0.707, 0.707>", rmul(Quaternion((0.0, 0.0, 0.707, 0.707)), Vector((-1.0, 0.0, 0.0))), Vector((0.0, -1.0, 0.0)))
         await self.ensureRotationEqual("(<1.0, 2.0, 3.0, 4.0> * <5.0, 6.0, 7.0, 8.0>)", (rmul(Quaternion((5.0, 6.0, 7.0, 8.0)), Quaternion((1.0, 2.0, 3.0, 4.0)))), Quaternion((32.0, 32.0, 56.0, -6.0)))
         await self.ensureIntegerEqual("(2 / 2)", (rdiv(2, 2)), 1)
-        await self.ensureFloatEqual("(2.2 / 2)", (rdiv(2.0, bin2float('2.200000', 'cdcc0c40'))), bin2float('1.100000', 'cdcc8c3f'))
-        await self.ensureFloatEqual("(3 / 1.5)", (rdiv(bin2float('1.500000', '0000c03f'), 3.0)), 2.0)
-        await self.ensureFloatEqual("(2.2 / 2.0)", (rdiv(2.0, bin2float('2.200000', 'cdcc0c40'))), bin2float('1.100000', 'cdcc8c3f'))
-        await self.ensureVectorEqual("(<1.0, 2.0, 3.0> / 2)", (rdiv(2.0, Vector((1.0, 2.0, 3.0)))), Vector((bin2float('0.500000', '0000003f'), 1.0, bin2float('1.500000', '0000c03f'))))
-        await self.ensureVectorEqual("(<3.0, 6.0, 9.0> / 1.5)", (rdiv(bin2float('1.500000', '0000c03f'), Vector((3.0, 6.0, 9.0)))), Vector((2.0, 4.0, 6.0)))
-        await self.ensureVectorEqual("<-1,0,0> / <0, 0, 0.707, 0.707>", rdiv(Quaternion((0.0, 0.0, bin2float('0.707000', 'f4fd343f'), bin2float('0.707000', 'f4fd343f'))), Vector((-1.0, 0.0, 0.0))), Vector((0.0, 1.0, 0.0)))
+        await self.ensureFloatEqual("(2.2 / 2)", (rdiv(2.0, 2.2)), 1.1)
+        await self.ensureFloatEqual("(3 / 1.5)", (rdiv(1.5, 3.0)), 2.0)
+        await self.ensureFloatEqual("(2.2 / 2.0)", (rdiv(2.0, 2.2)), 1.1)
+        await self.ensureVectorEqual("(<1.0, 2.0, 3.0> / 2)", (rdiv(2.0, Vector((1.0, 2.0, 3.0)))), Vector((0.5, 1.0, 1.5)))
+        await self.ensureVectorEqual("(<3.0, 6.0, 9.0> / 1.5)", (rdiv(1.5, Vector((3.0, 6.0, 9.0)))), Vector((2.0, 4.0, 6.0)))
+        await self.ensureVectorEqual("<-1,0,0> / <0, 0, 0.707, 0.707>", rdiv(Quaternion((0.0, 0.0, 0.707, 0.707)), Vector((-1.0, 0.0, 0.0))), Vector((0.0, 1.0, 0.0)))
         await self.ensureRotationEqual("(<1.0, 2.0, 3.0, 4.0> / <5.0, 6.0, 7.0, 8.0>)", (rdiv(Quaternion((5.0, 6.0, 7.0, 8.0)), Quaternion((1.0, 2.0, 3.0, 4.0)))), Quaternion((-16.0, 0.0, -8.0, 70.0)))
         await self.ensureIntegerEqual("(3 % 1)", (rmod(1, 3)), 0)
         await self.ensureVectorEqual("(<1.0, 2.0, 3.0> % <4.0, 5.0, 6.0>)", (rmod(Vector((4.0, 5.0, 6.0)), Vector((1.0, 2.0, 3.0)))), Vector((-3.0, 6.0, -3.0)))
@@ -295,7 +295,7 @@ class Script(BaseLSLScript):
         _i = rmul(2, _i)
         await self.ensureIntegerEqual("i = 2; i *= 2;", _i, 4)
         _i = 1
-        (_i := typecast(rmul(bin2float('0.500000', '0000003f'), _i), int))
+        (_i := typecast(rmul(0.5, _i), int))
         await self.ensureIntegerEqual("i = 1; i *= 0.5;", _i, 0)
         _i = 2
         _i = rdiv(2, _i)
@@ -320,16 +320,16 @@ class Script(BaseLSLScript):
         await self.ensureIntegerEqual("predec2", _i, 1)
         await self.ensureFloatEqual("((float)2)", (2.0), 2.0)
         await self.ensureStringEqual("((string)2)", (typecast(2, str)), "2")
-        await self.ensureIntegerEqual("((integer) 1.5)", (typecast(bin2float('1.500000', '0000c03f'), int)), 1)
-        await self.ensureStringEqual("((string) 1.5)", (typecast(bin2float('1.500000', '0000c03f'), str)), "1.500000")
+        await self.ensureIntegerEqual("((integer) 1.5)", (typecast(1.5, int)), 1)
+        await self.ensureStringEqual("((string) 1.5)", (typecast(1.5, str)), "1.500000")
         await self.ensureIntegerEqual("((integer) \"0xF\")", (typecast("0xF", int)), 15)
         await self.ensureIntegerEqual("((integer) \"2\")", (typecast("2", int)), 2)
-        await self.ensureFloatEqual("((float) \"1.5\")", (typecast("1.5", float)), bin2float('1.500000', '0000c03f'))
+        await self.ensureFloatEqual("((float) \"1.5\")", (typecast("1.5", float)), 1.5)
         await self.ensureVectorEqual("((vector) \"<1,2,3>\")", (typecast("<1,2,3>", Vector)), Vector((1.0, 2.0, 3.0)))
         await self.ensureRotationEqual("((quaternion) \"<1,2,3,4>\")", (typecast("<1,2,3,4>", Quaternion)), Quaternion((1.0, 2.0, 3.0, 4.0)))
         await self.ensureStringEqual("((string) <1,2,3>)", (typecast(Vector((1.0, 2.0, 3.0)), str)), "<1.00000, 2.00000, 3.00000>")
         await self.ensureStringEqual("((string) <1,2,3,4>)", (typecast(Quaternion((1.0, 2.0, 3.0, 4.0)), str)), "<1.00000, 2.00000, 3.00000, 4.00000>")
-        await self.ensureStringEqual("((string) [1,2.5,<1,2,3>])", (typecast([1, bin2float('2.500000', '00002040'), Vector((1.0, 2.0, 3.0))], str)), "12.500000<1.000000, 2.000000, 3.000000>")
+        await self.ensureStringEqual("((string) [1,2.5,<1,2,3>])", (typecast([1, 2.5, Vector((1.0, 2.0, 3.0))], str)), "12.500000<1.000000, 2.000000, 3.000000>")
         _i = 0
         while cond(rless(10, _i)):
             _i += 1
@@ -367,15 +367,15 @@ class Script(BaseLSLScript):
         await self.ensureIntegerEqual("i = 1; testParameters(i)", await self.testParameters(_i), 2)
         await self.ensureIntegerEqual("testRecursion(10)", await self.testRecursion(10), 0)
         await self.ensureIntegerEqual("gInteger", self.gInteger, 5)
-        await self.ensureFloatEqual("gFloat", self.gFloat, bin2float('1.500000', '0000c03f'))
+        await self.ensureFloatEqual("gFloat", self.gFloat, 1.5)
         await self.ensureStringEqual("gString", self.gString, "foo")
         await self.ensureVectorEqual("gVector", self.gVector, Vector((1.0, 2.0, 3.0)))
         await self.ensureRotationEqual("gRot", self.gRot, Quaternion((1.0, 2.0, 3.0, 4.0)))
         await self.ensureListEqual("gList", self.gList, [1, 2, 3])
         self.gInteger = 1
         await self.ensureIntegerEqual("gInteger = 1", self.gInteger, 1)
-        self.gFloat = bin2float('0.500000', '0000003f')
-        await self.ensureFloatEqual("gFloat = 0.5", self.gFloat, bin2float('0.500000', '0000003f'))
+        self.gFloat = 0.5
+        await self.ensureFloatEqual("gFloat = 0.5", self.gFloat, 0.5)
         self.gString = "bar"
         await self.ensureStringEqual("gString = \"bar\"", self.gString, "bar")
         self.gVector = Vector((3.0, 3.0, 3.0))
@@ -394,15 +394,15 @@ class Script(BaseLSLScript):
         _q = Quaternion((0.0, 0.0, 0.0, 1.0))
         _q = replace_coord_axis(_q, 3, 5.0)
         await self.ensureFloatEqual("q.s", _q[3], 5.0)
-        self.gVector = replace_coord_axis(self.gVector, 1, bin2float('17.500000', '00008c41'))
-        await self.ensureFloatEqual("gVector.y = 17.5", self.gVector[1], bin2float('17.500000', '00008c41'))
-        self.gRot = replace_coord_axis(self.gRot, 2, bin2float('19.500000', '00009c41'))
-        await self.ensureFloatEqual("gRot.z = 19.5", self.gRot[2], bin2float('19.500000', '00009c41'))
+        self.gVector = replace_coord_axis(self.gVector, 1, 17.5)
+        await self.ensureFloatEqual("gVector.y = 17.5", self.gVector[1], 17.5)
+        self.gRot = replace_coord_axis(self.gRot, 2, 19.5)
+        await self.ensureFloatEqual("gRot.z = 19.5", self.gRot[2], 19.5)
         _l = typecast(5, list)
         _l2 = typecast(5, list)
         await self.ensureListEqual("leq1", _l, _l2)
         await self.ensureListEqual("leq2", _l, [5])
-        await self.ensureListEqual("leq3", [bin2float('1.500000', '0000c03f'), 6, Vector((1.0, 2.0, 3.0)), Quaternion((1.0, 2.0, 3.0, 4.0))], [bin2float('1.500000', '0000c03f'), 6, Vector((1.0, 2.0, 3.0)), Quaternion((1.0, 2.0, 3.0, 4.0))])
+        await self.ensureListEqual("leq3", [1.5, 6, Vector((1.0, 2.0, 3.0)), Quaternion((1.0, 2.0, 3.0, 4.0))], [1.5, 6, Vector((1.0, 2.0, 3.0)), Quaternion((1.0, 2.0, 3.0, 4.0))])
         await self.ensureIntegerEqual("sesc1", await self.builtin_funcs.llStringLength("\\"), 1)
         await self.ensureIntegerEqual("sesc2", await self.builtin_funcs.llStringLength("    "), 4)
         await self.ensureIntegerEqual("sesc3", await self.builtin_funcs.llStringLength("\n"), 1)
@@ -422,10 +422,15 @@ class Script(BaseLSLScript):
         await self.ensureFloatEqual("++v.z", preincr(locals(), "_v", 2), 4.0)
         _v = Vector((1.0, 2.0, 3.0))
         await self.ensureFloatEqual("v.z++", postincr(locals(), "_v", 2), 3.0)
+        await self.ensureFloatEqual("posinf == posinf", float("inf"), float("inf"))
+        await self.ensureFloatEqual("neginf == neginf", float("-inf"), float("-inf"))
+        await self.ensureFalse("posinf != neginf", req(float("-inf"), float("inf")))
+        await self.ensureStringEqual("(string)posinf == 'Infinity'", typecast(float("inf"), str), "Infinity")
+        await self.ensureStringEqual("(string)neginf == '-Infinity'", typecast(float("-inf"), str), "-Infinity")
 
     async def runTests(self) -> None:
         self.gInteger = 5
-        self.gFloat = bin2float('1.500000', '0000c03f')
+        self.gFloat = 1.5
         self.gString = "foo"
         self.gVector = Vector((1.0, 2.0, 3.0))
         self.gRot = Quaternion((1.0, 2.0, 3.0, 4.0))

@@ -52,31 +52,67 @@ void PythonVisitor::writeChildrenSep(LSLASTNode *parent, const char *separator) 
   }
 }
 
+const std::string INF_STR = "inf";
+const std::string NEG_INF_STR = "-inf";
+const std::set<std::string> NAN_STRS {
+    "nan",
+    "-nan",
+    "-nan(ind)",
+    "nan(ind)"
+};
+
 void PythonVisitor::writeFloat(float f_val) {
-  if (std::nearbyint((double)f_val) == (double)f_val) {
-    // if it's int-like then we can write it in decimal form without loss of precision
-    // but we need a special case for -0!
-    if (f_val == 0 && std::signbit(f_val)) {
-        mStr << "-0.0";
-        return;
-    }
-    mStr << (int64_t)f_val << ".0";
+  bool special_repr = false;
+  std::string s_val(std::to_string(f_val));
+
+  if (s_val == INF_STR || s_val == NEG_INF_STR) {
+    special_repr = true;
+  // Only one kind of NaN in LSL!
+  } else if (NAN_STRS.find(s_val) != NAN_STRS.end()) {
+    s_val = "nan";
+    special_repr = true;
+  }
+
+  if (special_repr) {
+    mStr << "float(\"" << s_val << "\")";
     return;
   }
+
+  // strip insignificant trailing zeroes from the string form
+  auto non_zero_pos = s_val.find_last_not_of('0');
+  auto decimal_pos = s_val.find_last_of('.');
+  // there is a decimal
+  if (decimal_pos != std::string::npos) {
+    if (non_zero_pos == decimal_pos) {
+      // 5.00000
+      s_val.erase(non_zero_pos + 2, std::string::npos);
+    } else if (non_zero_pos > decimal_pos) {
+      // 1.50000, but not 103.55555
+      s_val.erase(non_zero_pos + 1, std::string::npos);
+    }
+  }
+
+  if (std::stof(s_val) == f_val && std::isfinite(f_val)) {
+    // The float is exactly representable in the string form,
+    // just print that out.
+    mStr << s_val;
+    return;
+  }
+
+  // This float is hard to represent as a string without losing precision.
   // Write in host-endian binary form to preserve precision
   auto *b_val = reinterpret_cast<uint8_t *>(&f_val);
-  const size_t s_val_len = (4 * 2) + 1;
-  char s_val[s_val_len] = {0};
+  const size_t hex_val_len = (4 * 2) + 1;
+  char hex_val[hex_val_len] = {0};
   snprintf(
-      (char *)&s_val,
-      s_val_len,
+      (char *)&hex_val,
+      hex_val_len,
       "%02x%02x%02x%02x",
       b_val[0], b_val[1], b_val[2], b_val[3]
   );
   // the human-readable float val is first in the tuple, but it isn't actually used, it's only there
   // for readability.
-  // TODO: some better heuristic for floats that are representable in float literal form.
-  mStr << "bin2float('" << std::to_string(f_val) << "', '"<< (const char*)&s_val << "')";
+  mStr << "bin2float('" << s_val << "', '" << (const char*)&hex_val << "')";
 }
 
 std::string PythonVisitor::getSymbolName(LSLSymbol *sym) {

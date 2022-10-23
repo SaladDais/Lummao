@@ -50,7 +50,7 @@ class Script(BaseLSLScript):
 
     async def floatEqual(self, _actual: float, _expected: float) -> int:
         _error: float = await self.builtin_funcs.llFabs(rsub(_actual, _expected))
-        _epsilon: float = bin2float('0.001000', '6f12833a')
+        _epsilon: float = 0.001
         if cond(rgreater(_epsilon, _error)):
             await self.builtin_funcs.llSay(0, radd(typecast(_error, str), "Float equality delta "))
             return 0
@@ -127,7 +127,7 @@ class Script(BaseLSLScript):
 
     async def tests(self) -> None:
         await self.ensureTrue("gVisitedStateTest ", self.gVisitedStateTest)
-        await self.ensureFloatExactEqual("1.4e-45 == (float)\"1.4e-45\"", bin2float('0.000000', '01000000'), typecast("1.4e-45", float))
+        await self.ensureFloatExactEqual("1.4e-45 == (float)\"1.4e-45\"", bin2float('0.0', '01000000'), typecast("1.4e-45", float))
         await self.testArgumentAccessor(Vector((0.0, 0.0, 0.0)))
         await self.testLocalAccessor()
         await self.testGlobalAccessor()
@@ -152,7 +152,7 @@ class Script(BaseLSLScript):
         radd(1, _l)
         await self.ensureListEqual("list l = [42]; l + 1; l == [42]", _l, [42])
         _l = [42]
-        radd(bin2float('1.500000', '0000c03f'), _l)
+        radd(1.5, _l)
         await self.ensureListEqual("list l = [42]; l + 1.5; l == [42]", _l, [42])
         _l = [42]
         radd("00000000-0000-0000-0000-000000000000", _l)
@@ -287,8 +287,8 @@ class Script(BaseLSLScript):
         _v = rmul(2.0, _v)
         await self.ensureVectorEqual("v = <1,2,3>; v *= 2;", _v, Vector((2.0, 4.0, 6.0)))
         _v = Vector((1.0, 2.0, 3.0))
-        _v = rmul(bin2float('0.500000', '0000003f'), _v)
-        await self.ensureVectorEqual("v = <1,2,3>; v *= 0.5;", _v, Vector((bin2float('0.500000', '0000003f'), 1.0, bin2float('1.500000', '0000c03f'))))
+        _v = rmul(0.5, _v)
+        await self.ensureVectorEqual("v = <1,2,3>; v *= 0.5;", _v, Vector((0.5, 1.0, 1.5)))
         _v = Vector((1.0, 0.0, 0.0))
         _v = rmul(Quaternion((0.0, 0.0, 0.0, 1.0)), _v)
         await self.ensureVectorEqual("vector v = <1,0,0>; v *= ZERO_ROTATION;", _v, Vector((1.0, 0.0, 0.0)))

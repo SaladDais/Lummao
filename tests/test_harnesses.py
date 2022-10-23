@@ -23,7 +23,7 @@ class HarnessTestCase(unittest.IsolatedAsyncioTestCase):
         script = self._compile_script_filename("lsl_conformance.lsl")
         # If it doesn't raise then we count that as a success.
         await script.edefaultstate_entry()
-        self.assertEqual(182, script.gTestsPassed)
+        self.assertEqual(187, script.gTestsPassed)
         self.assertEqual(0, script.gTestsFailed)
 
     async def test_run_execute_loop_with_state_changes(self):
