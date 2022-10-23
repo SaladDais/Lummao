@@ -6,14 +6,27 @@
 
 using namespace Tailslide;
 
-static PyObject* set_error(const char* message)
+static PyObject* set_error(Logger *logger)
 {
   PyObject *mod_lummao = PyImport_ImportModule("lummao.exceptions");
   assert (mod_lummao != NULL);
   PyObject* type_compile_error = PyObject_GetAttrString(mod_lummao, "CompileError");
   assert (type_compile_error != NULL);
 
-  PyErr_SetString(type_compile_error, message);
+  auto &messages = logger->getMessages();
+  PyObject *message_tup = PyTuple_New(messages.size());
+  int idx = 0;
+  for (const auto &message : messages) {
+    PyObject *err_str = PyUnicode_FromString(message->getMessage().c_str());
+    PyTuple_SetItem(message_tup, idx, err_str);
+    ++idx;
+  }
+
+  // Need to do this or exceptions with only one error will
+  // be treated differently.
+  PyObject *err_args = PyTuple_New(1);
+  PyTuple_SetItem(err_args, 0, message_tup);
+  PyErr_SetObject(type_compile_error, err_args);
   return nullptr;
 }
 
@@ -52,8 +65,7 @@ PyObject* lsl_to_python_src(PyObject* self, PyObject *args, PyObject *kwargs) {
     }
   }
   if (logger->getErrors()) {
-    // TODO: output the actual errors
-    return set_error("Error occurred during compilation");
+    return set_error(logger);
   }
 
   PythonVisitor py_visitor;

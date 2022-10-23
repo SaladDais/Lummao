@@ -24,6 +24,23 @@ class ConformanceTestCase(unittest.TestCase):
     def test_statements_matches(self):
         self._assert_output_matches("statements.lsl", "statements.py")
 
+    def test_one_error_raised(self):
+        with self.assertRaises(lummao.CompileError) as e:
+            lummao.convert_script_file(RESOURCES_PATH / "one_error.lsl")
+        expected = (
+            "ERROR:: (  3,  9): [E10015] `string foo' assigned a integer value.",
+        )
+        self.assertSequenceEqual(expected, e.exception.err_msgs)
+
+    def test_two_errors_raised(self):
+        with self.assertRaises(lummao.CompileError) as e:
+            lummao.convert_script_file(RESOURCES_PATH / "two_errors.lsl")
+        expected = (
+            "ERROR:: (  3,  9): [E10015] `string foo' assigned a integer value.",
+            "ERROR:: (  4,  9): [E10015] `string baz' assigned a integer value."
+        )
+        self.assertSequenceEqual(expected, e.exception.err_msgs)
+
 
 if __name__ == '__main__':
     unittest.main()
