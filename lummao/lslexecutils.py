@@ -207,7 +207,18 @@ def _make_async(func):
     return _wrapper
 
 
-class CallableCollection(Dict[str, Callable]):
+class BuiltinsCollection(Dict[str, Callable]):
+    def __init__(self):
+        super().__init__()
+        # Stuff all the builtins we have functions for into a big ol dict where they can be replaced
+        for func_name in dir(lslfuncs):
+            if not func_name.startswith("ll"):
+                continue
+            val = getattr(lslfuncs, func_name)
+            if not callable(val):
+                continue
+            self[func_name] = val
+
     def __getattr__(self, item):
         # All function calls in Lummao need to be async, but most of the
         # builtin functions are not actually implemented as coroutines.
@@ -243,15 +254,7 @@ class BaseLSLScript:
         self.next_state: Optional[str] = None
         self.detected_stack: List[DetectedDetails] = []
         self.event_queue: List[Tuple[str, Sequence[Any], List[DetectedDetails]]] = [("state_entry", (), [])]
-        self.builtin_funcs: CallableCollection = CallableCollection()
-        # Stuff all the builtins we have functions for into a big ol dict where they can be replaced
-        for func_name in dir(lslfuncs):
-            if not func_name.startswith("ll"):
-                continue
-            val = getattr(lslfuncs, func_name)
-            if not callable(val):
-                continue
-            self.builtin_funcs[func_name] = val
+        self.builtin_funcs = BuiltinsCollection()
         # Patch llDetected* builtins so that they return details related to the current event
         for field in dataclasses.fields(DetectedDetails):
             self.builtin_funcs['llDetected' + field.name] = self._make_detected_wrapper(field.name)
@@ -278,7 +281,10 @@ class BaseLSLScript:
         func = getattr(self, f"e{self.current_state}{name}", None)
         if func is not None:
             self.detected_stack = detected_stack
-            await func(*args)
+            try:
+                await func(*args)
+            finally:
+                self.detected_stack = []
 
     async def execute_one(self):
         event, event_args, detected_stack = self.event_queue.pop(0)
@@ -288,10 +294,13 @@ class BaseLSLScript:
             if event == "state_exit":
                 # Need to queue a state_entry for the new state
                 self.current_state = self.next_state
+                self.next_state = None
+                self.event_queue.clear()
                 self.event_queue.append(("state_entry", (), []))
 
         except StateChangeException as e:
             self.next_state = e.new_state
+            # Switching states blows away the event stack
             self.event_queue.clear()
             self.event_queue.append(("state_exit", (), []))
 
