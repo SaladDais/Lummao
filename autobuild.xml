@@ -24,11 +24,11 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>b5978ea18ca12c1a252aa2ac92bfa7816cfafd3d</string>
+              <string>cd5b4b6c4fdface1cacdfb999f9ac7db19e2e962</string>
               <key>hash_algorithm</key>
               <string>sha1</string>
               <key>url</key>
-              <string>https://github.com/SaladDais/tailslide/releases/download/v1.3.1/tailslide-darwin64-1.3.1.tar.zst</string>
+              <string>https://github.com/SaladDais/tailslide/releases/download/v1.3.2/tailslide-darwin64-1.3.2.tar.zst</string>
             </map>
             <key>name</key>
             <string>darwin64</string>
@@ -38,11 +38,11 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>4cb82fa4e27924e865b09e6d9a182b653b2ea433</string>
+              <string>2a4163f7578bf9e9037e78df85367f3952997be7</string>
               <key>hash_algorithm</key>
               <string>sha1</string>
               <key>url</key>
-              <string>https://github.com/SaladDais/tailslide/releases/download/v1.3.1/tailslide-linux64-1.3.1.tar.zst</string>
+              <string>https://github.com/SaladDais/tailslide/releases/download/v1.3.2/tailslide-linux64-1.3.2.tar.zst</string>
             </map>
             <key>name</key>
             <string>linux64</string>
@@ -52,11 +52,11 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>c792a7db73cd9a7c5f3491f3ad252623f7de5d0e</string>
+              <string>84f2c5b529786c89c1e1bafecd29ad34d1c7321e</string>
               <key>hash_algorithm</key>
               <string>sha1</string>
               <key>url</key>
-              <string>https://github.com/SaladDais/tailslide/releases/download/v1.3.1/tailslide-windows64-1.3.1.tar.zst</string>
+              <string>https://github.com/SaladDais/tailslide/releases/download/v1.3.2/tailslide-windows64-1.3.2.tar.zst</string>
             </map>
             <key>name</key>
             <string>windows64</string>
@@ -73,7 +73,7 @@
         <key>vcs_url</key>
         <string>https://github.com/SaladDais/tailslide</string>
         <key>version</key>
-        <string>1.3.1</string>
+        <string>1.3.2</string>
       </map>
     </map>
     <key>package_description</key>
