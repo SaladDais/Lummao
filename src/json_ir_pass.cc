@@ -530,7 +530,7 @@ bool JSONScriptCompiler::visit(LSLVectorExpression *vec_expr) {
 
 bool JSONScriptCompiler::visit(LSLQuaternionExpression *quat_expr) {
   visitChildren(quat_expr);
-  pushCoordinate(LST_VECTOR);
+  pushCoordinate(LST_QUATERNION);
   return false;
 }
 
