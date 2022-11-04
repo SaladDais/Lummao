@@ -63,7 +63,7 @@ setup(
     ext_modules=[
         AutobuildExtension(
             "lummao._compiler",
-            sources=["src/python_pass.cc", "src/compiler.cc"],
+            sources=["src/python_pass.cc", "src/json_ir_pass.cc", "src/compiler.cc"],
             define_macros=[("Py_LIMITED_API", "0x03080000")],
             libraries=["tailslide"],
             library_dirs=["build/packages/lib/release"],

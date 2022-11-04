@@ -1,3 +1,4 @@
+import json
 from typing import Union
 
 from .vendor.lslopt.lslfuncs import typecast, Quaternion, Vector, Key, cond, neg
@@ -34,3 +35,12 @@ def compile_script_file(path) -> BaseLSLScript:
     """Compile an LSL script file to a Python class, returning a class instance"""
     with open(path, "rb") as f:
         return compile_script(f.read())
+
+
+def convert_script_to_ir(lsl_contents: Union[str, bytes]) -> Dict:
+    """Convert an LSL script to a Python script, returning the Python text"""
+    if isinstance(lsl_contents, str):
+        lsl_bytes = lsl_contents.encode("utf8")
+    else:
+        lsl_bytes = lsl_contents
+    return json.loads(compiler_mod.lsl_to_ir(lsl_bytes))

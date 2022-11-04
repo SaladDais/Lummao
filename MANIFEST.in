@@ -1,4 +1,6 @@
 include src/*.hh
+include src/*.cc
+include extern/*.hh
 include MANIFEST.in
 include README.md
 include LICENSE

@@ -1,4 +1,5 @@
 #include "python_pass.hh"
+#include "json_ir_pass.hh"
 #include <string>
 
 #define PY_SSIZE_T_CLEAN 1
@@ -30,7 +31,14 @@ static PyObject* set_error(Logger *logger)
   return nullptr;
 }
 
-PyObject* lsl_to_python_src(PyObject* self, PyObject *args, PyObject *kwargs) {
+
+enum LSLHandleMode {
+    LSL_TO_PYTHON,
+    LSL_TO_IR,
+} eLSLHandleMode;
+
+
+PyObject* parse_and_handle_lsl(LSLHandleMode mode, PyObject* self, PyObject *args, PyObject *kwargs) {
   PyObject *buffer;
   if (!PyArg_ParseTuple(args, "O", &buffer))
   {
@@ -68,15 +76,39 @@ PyObject* lsl_to_python_src(PyObject* self, PyObject *args, PyObject *kwargs) {
     return set_error(logger);
   }
 
-  PythonVisitor py_visitor;
-  script->visit(&py_visitor);
-  std::string py_code {py_visitor.mStr.str()};
-  return PyBytes_FromStringAndSize(py_code.c_str(), py_code.size());
+  switch (mode) {
+    case LSL_TO_PYTHON: {
+      PythonVisitor py_visitor;
+      script->visit(&py_visitor);
+      std::string py_code {py_visitor.mStr.str()};
+      return PyBytes_FromStringAndSize(py_code.c_str(), py_code.size());
+    }
+    case LSL_TO_IR: {
+      JSONScriptCompiler json_visitor(&parser.allocator, {
+        .omit_unnecessary_pushes = true
+      });
+      script->visit(&json_visitor);
+      std::stringstream sstr;
+      sstr << std::setw(2) << json_visitor.mIR << "\n";
+      std::string json_str {sstr.str()};
+      return PyBytes_FromStringAndSize(json_str.c_str(), json_str.size());
+    }
+  }
+  return nullptr;
+}
+
+PyObject* lsl_to_python_src(PyObject* self, PyObject *args, PyObject *kwargs) {
+  return parse_and_handle_lsl(LSL_TO_PYTHON, self, args, kwargs);
+}
+
+PyObject* lsl_to_ir(PyObject* self, PyObject *args, PyObject *kwargs) {
+  return parse_and_handle_lsl(LSL_TO_IR, self, args, kwargs);
 }
 
 
 static PyMethodDef compilerMethods[] = {
   {"lsl_to_python_src", (PyCFunction) lsl_to_python_src, METH_VARARGS, NULL},
+  {"lsl_to_ir", (PyCFunction) lsl_to_ir, METH_VARARGS, NULL},
   {NULL, NULL, 0, NULL}       /* Sentinel */
 };
 
