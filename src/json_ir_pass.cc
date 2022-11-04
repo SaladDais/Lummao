@@ -517,7 +517,7 @@ bool JSONScriptCompiler::visit(LSLBoolConversionExpression *bool_expr) {
   bool_expr->getChildExpr()->visit(this);
   writeOp({
       {"op", "BOOL"},
-      {"type", JSON_TYPE_NAMES[bool_expr->getIType()]}
+      {"type", JSON_TYPE_NAMES[bool_expr->getChildExpr()->getIType()]}
   });
   return false;
 }
