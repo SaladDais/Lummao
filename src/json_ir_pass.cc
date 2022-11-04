@@ -582,8 +582,8 @@ bool JSONScriptCompiler::visit(LSLFunctionExpression *func_expr) {
   // the return value. Library calls place the retval themselves where necessary.
   if (func_sym->getSubType() != SYM_BUILTIN && func_sym->getIType())
     writeOp({
-        {"op", "PUSH_DEFAULT"},
-        {"type", JSON_TYPE_NAMES[LST_INTEGER]}
+        {"op", "PUSH_EMPTY"},
+        {"type", JSON_TYPE_NAMES[func_sym->getIType()]}
     });
 
   // push the arguments onto the stack
