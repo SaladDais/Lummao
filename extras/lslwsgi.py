@@ -66,8 +66,8 @@ class LSLWSGIWrapper:
         resp = Response(body, status_code, content_type=req_data.content_type)
         req_data.resp_fut.set_result(resp)
 
-    async def execute(self):
-        await self.script.execute()
+    async def execute(self) -> bool:
+        return await self.script.execute()
 
     async def handle_request(self):
         # LSL has a bunch of special internally-meaningful HTTP methods that shouldn't

@@ -26,8 +26,8 @@ class ShelLSLWrapper:
         self.script.argc = len(new_argv)
         self.script.argv = new_argv
 
-    async def execute(self):
-        await self.script.execute()
+    async def execute(self) -> bool:
+        return await self.script.execute()
 
     async def _system_wrapper(self, command: str):
         p = Popen(command, shell=True)

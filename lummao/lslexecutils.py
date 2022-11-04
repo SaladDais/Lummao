@@ -304,6 +304,9 @@ class BaseLSLScript:
             self.event_queue.clear()
             self.event_queue.append(("state_exit", (), []))
 
-    async def execute(self):
+    async def execute(self) -> bool:
+        handled = False
         while self.event_queue:
+            handled = True
             await self.execute_one()
+        return handled
