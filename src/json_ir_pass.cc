@@ -364,6 +364,19 @@ void JSONScriptCompiler::pushLValue(LSLLValueExpression *lvalue) {
   }
 }
 
+static json float_to_json(float f_val) {
+  // JSON can't actually represent inf or nan, need to stringify :/
+  if (!std::isfinite(f_val)) {
+    if (f_val > 0.0f)
+      return json::string_t{"inf"};
+    else if (f_val < 0.0f)
+      return json::string_t{"-inf"};
+    else
+      return json::string_t{"nan"};
+  }
+  return json::number_float_t{f_val};
+}
+
 void JSONScriptCompiler::pushConstant(LSLConstant *cv) {
   if (!cv)
     return;
@@ -376,9 +389,10 @@ void JSONScriptCompiler::pushConstant(LSLConstant *cv) {
     case LST_INTEGER:
       obj["value"] = ((LSLIntegerConstant *) cv)->getValue();
       break;
-    case LST_FLOATINGPOINT:
-      obj["value"] = ((LSLFloatConstant *) cv)->getValue();
+    case LST_FLOATINGPOINT: {
+      obj["value"] = float_to_json(((LSLFloatConstant *) cv)->getValue());
       break;
+    }
     case LST_STRING:
       obj["value"] = ((LSLStringConstant *) cv)->getValue();
       break;
@@ -388,19 +402,19 @@ void JSONScriptCompiler::pushConstant(LSLConstant *cv) {
     case LST_VECTOR: {
       json::array_t coord_array;
       auto *vec_val = ((LSLVectorConstant *) cv)->getValue();
-      coord_array.push_back(vec_val->x);
-      coord_array.push_back(vec_val->y);
-      coord_array.push_back(vec_val->z);
+      coord_array.push_back(float_to_json(vec_val->x));
+      coord_array.push_back(float_to_json(vec_val->y));
+      coord_array.push_back(float_to_json(vec_val->z));
       obj["value"] = coord_array;
       break;
     }
     case LST_QUATERNION: {
       json::array_t coord_array;
       auto *vec_val = ((LSLQuaternionConstant *) cv)->getValue();
-      coord_array.push_back(vec_val->x);
-      coord_array.push_back(vec_val->y);
-      coord_array.push_back(vec_val->z);
-      coord_array.push_back(vec_val->s);
+      coord_array.push_back(float_to_json(vec_val->x));
+      coord_array.push_back(float_to_json(vec_val->y));
+      coord_array.push_back(float_to_json(vec_val->z));
+      coord_array.push_back(float_to_json(vec_val->s));
       obj["value"] = coord_array;
       break;
     }
