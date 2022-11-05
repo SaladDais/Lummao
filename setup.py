@@ -50,7 +50,7 @@ setup(
     packages=find_packages(include=['lummao', 'lummao.*']),
     data_files=[],
     install_requires=[],
-    python_requires='>=3.8',
+    python_requires='>=3.8,<3.11',
     zip_safe=False,
     use_scm_version=True,
     setup_requires=['setuptools_scm', 'autobuild<4'],
