@@ -41,7 +41,7 @@ jobs:
     - name: Repair Wheels
       if: ${{ runner.os == 'Linux' }}
       run: |
-        pip install auditwheel
+        pip install "auditwheel==5.1.2"
         auditwheel repair --plat manylinux_2_24_x86_64 dist/*.whl
         rm -rf dist/*.whl
         mv wheelhouse/* dist/
