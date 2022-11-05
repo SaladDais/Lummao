@@ -84,9 +84,7 @@ PyObject* parse_and_handle_lsl(LSLHandleMode mode, PyObject* self, PyObject *arg
       return PyBytes_FromStringAndSize(py_code.c_str(), py_code.size());
     }
     case LSL_TO_IR: {
-      JSONScriptCompiler json_visitor(&parser.allocator, {
-        .omit_unnecessary_pushes = true
-      });
+      JSONScriptCompiler json_visitor(&parser.allocator, {true});
       script->visit(&json_visitor);
       std::stringstream sstr;
       sstr << std::setw(2) << json_visitor.mIR << "\n";
