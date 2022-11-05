@@ -561,9 +561,6 @@ bool JSONScriptCompiler::visit(LSLLValueExpression *lvalue) {
 }
 
 bool JSONScriptCompiler::visit(LSLListExpression *list_expr) {
-  // LL's compiler pushes lists in a different order in globexprs for some reason,
-  // maybe something about order of evaluation being important there.
-  // match their behavior so it's less annoying to compare output.
   uint32_t num_elems = 0;
   for (auto child : *list_expr) {
     child->visit(this);
