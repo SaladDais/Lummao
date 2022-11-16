@@ -219,13 +219,17 @@ class BuiltinsCollection(Dict[str, Callable]):
                 continue
             self[func_name] = val
 
-    def __getattr__(self, item):
+    def __setitem__(self, key, value):
         # All function calls in Lummao need to be async, but most of the
         # builtin functions are not actually implemented as coroutines.
         # Wrap everything that comes out of this collection through the `.`
         # accessor in a coroutine that makes it `await`able if it's not
         # already a coroutine.
-        return _make_async(self[item])
+        value = _make_async(value)
+        super().__setitem__(key, value)
+
+    def __getattr__(self, item):
+        return self[item]
 
 
 @dataclasses.dataclass
