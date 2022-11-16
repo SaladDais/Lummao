@@ -19,9 +19,9 @@ pip install lummao
 
 ### From source
 
-* Download <https://github.com/SaladDais/tailslide> and follow the compilation instructions, doing `make install` at the end
-* Download <https://github.com/SaladDais/Lummao>
-* `pip install -e .`
+```bash
+pip install -e .
+```
 
 ## How
 
