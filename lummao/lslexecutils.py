@@ -156,8 +156,12 @@ def prepostincrdecr(sym_scope, sym_name, mod_amount, post, member_idx, frame):
     else:
         new_sym_val = new_val
 
-    sym_scope[sym_name] = new_sym_val
+    if sys.version_info >= (3, 11) and sym_scope == frame.f_locals:
+        # Python 3.11+ is special and needs to be convinced that locals should be
+        # mutable via the locals() dict.
+        ctypes.pythonapi.PyFrame_GetLocals(ctypes.py_object(frame))
 
+    sym_scope[sym_name] = new_sym_val
     # Force an update of the locals array from locals dict (if we were dealing with a locals dict)
     # Only works if the locals dict is from the immediate caller!
     # We could remove this requirement by representing "locals" with a class that holds all locals,

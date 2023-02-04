@@ -4,18 +4,28 @@ import subprocess
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
-from wheel.bdist_wheel import bdist_wheel
+
+try:
+    from wheel.bdist_wheel import bdist_wheel
+except ImportError:
+    bdist_wheel = None
 
 
-class BDistWheelABI3(bdist_wheel):
-    def get_tag(self):
-        python, abi, plat = super().get_tag()
+extra_cmds = {}
 
-        if python.startswith("cp"):
-            # on CPython, our wheels are abi3 and compatible back to 3.8
-            return "cp38", "abi3", plat
 
-        return python, abi, plat
+if bdist_wheel is not None:
+    class BDistWheelABI3(bdist_wheel):
+        def get_tag(self):
+            python, abi, plat = super().get_tag()
+
+            if python.startswith("cp"):
+                # on CPython, our wheels are abi3 and compatible back to 3.8
+                return "cp38", "abi3", plat
+
+            return python, abi, plat
+
+    extra_cmds["bdist_wheel"] = BDistWheelABI3
 
 
 class AutobuildBuildExt(build_ext):
@@ -49,17 +59,18 @@ setup(
     author_email='SaladDais@users.noreply.github.com',
     packages=find_packages(include=['lummao', 'lummao.*']),
     data_files=[],
-    install_requires=[],
-    python_requires='>=3.8,<3.11',
+    install_requires=['bytecode>=0.14,<1.0'],
+    python_requires='>=3.8',
     zip_safe=False,
     use_scm_version=True,
     setup_requires=['setuptools_scm', 'autobuild<4'],
     tests_require=[
         "pytest",
-        "pytest-cov"
+        "pytest-cov",
+        "wheel",
     ],
     test_suite="tests",
-    cmdclass={"bdist_wheel": BDistWheelABI3, "build_ext": AutobuildBuildExt},
+    cmdclass={"build_ext": AutobuildBuildExt, **extra_cmds},
     ext_modules=[
         AutobuildExtension(
             "lummao._compiler",
