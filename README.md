@@ -25,7 +25,8 @@ pip install -e .
 
 ## How
 
-For a real-world example, see <https://github.com/SaladDais/SLGraphPather>'s tests and test coverage reporting.
+For a real-world example, see <https://github.com/SaladDais/SLGraphPather> or <https://github.com/SaladDais/SickJoke>'s
+tests and test coverage reporting.
 
 Along with the python API, a helper `lummao` script is provided that takes in an LSL file and outputs a python file.
 It can be invoked like `lummao input.lsl output.py`.
