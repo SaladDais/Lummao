@@ -129,7 +129,6 @@ def main():
         port=_get_server_port(),
         use_reloader=False,
     )
-    app.run_task()
 
 
 if __name__ == "__main__":
