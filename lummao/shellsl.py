@@ -51,7 +51,7 @@ class ShelLSLExtender(ScriptExtender):
         return stdout.decode("utf8").rstrip("\n")
 
 
-async def main():
+def shellsl_main():
     with open(sys.argv[1], "rb") as f:
         lsl_bytes = f.read()
     # replace shebang line if present
@@ -69,8 +69,8 @@ async def main():
     datetime_extender = DateTimeScriptExtender()
     datetime_extender.extend_script(script)
 
-    await script.execute_until_complete()
+    asyncio.run(script.execute_until_complete())
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    shellsl_main()

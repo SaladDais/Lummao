@@ -89,6 +89,7 @@ setup(
     entry_points={
         'console_scripts': {
             'lummao = lummao.cli:cli_main',
+            'shellsl = lummao.shellsl:shellsl_main',
         }
     },
 )
