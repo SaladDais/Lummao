@@ -1,3 +1,5 @@
 pytest
 pytest-cov
 flake8
+pytest-httpbin
+werkzeug<2.1

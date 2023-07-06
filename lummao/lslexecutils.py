@@ -17,15 +17,19 @@
 Wrappers for PyOptimizer's eval functionality, with reversed argument order for correct LSL
 expression eval order
 """
+import abc
 import asyncio
 import binascii
+import contextlib
 import ctypes
 import dataclasses
 import functools
 import struct
 import sys
+import time
 import uuid
-from typing import List, Sequence, Tuple, Any, Optional, Dict, Callable
+import weakref
+from typing import List, Sequence, Tuple, Any, Optional, Dict, Callable, Set, Coroutine
 
 from .vendor.lslopt import lslfuncs, lslcommon
 
@@ -262,10 +266,16 @@ class BaseLSLScript:
         self.next_state: Optional[str] = None
         self.detected_stack: List[DetectedDetails] = []
         self.event_queue: List[Tuple[str, Sequence[Any], List[DetectedDetails]]] = [("state_entry", (), [])]
+        # Things that may publish to the event queue asynchronously
+        self.event_publishers: weakref.WeakKeyDictionary[Any] = weakref.WeakKeyDictionary()
         self.builtin_funcs = BuiltinsCollection()
         # Patch llDetected* builtins so that they return details related to the current event
         for field in dataclasses.fields(DetectedDetails):
             self.builtin_funcs['llDetected' + field.name] = self._make_detected_wrapper(field.name)
+
+    @property
+    def active_publishers(self) -> bool:
+        return bool(sum(self.event_publishers.values()))
 
     def _make_detected_wrapper(self, detected_name: str) -> Callable[[int], Any]:
         def _wrapper(num: int):
@@ -295,6 +305,7 @@ class BaseLSLScript:
                 self.detected_stack = []
 
     async def execute_one(self):
+        """Execute a single event from the event queue"""
         event, event_args, detected_stack = self.event_queue.pop(0)
         try:
             await self._trigger_event_handler(event, *event_args, detected_stack=detected_stack)
@@ -313,8 +324,110 @@ class BaseLSLScript:
             self.event_queue.append(("state_exit", (), []))
 
     async def execute(self) -> bool:
+        """Execute all events on the event queue"""
         handled = False
         while self.event_queue:
             handled = True
             await self.execute_one()
         return handled
+
+    async def execute_until_complete(self) -> bool:
+        """Execute until all background publishers are complete"""
+        handled = False
+        while self.active_publishers or self.event_queue:
+            handled = await self.execute() or handled
+
+            # We have async things running in the BG that may push to the event queue,
+            # wait around a bit and try processing the event queue again.
+            if self.active_publishers:
+                await asyncio.sleep(0.0001)
+        return handled
+
+
+class ScriptExtender(abc.ABC):
+    """Base class for something that extends a single script, modifying its environment"""
+    script: Optional[BaseLSLScript]
+
+    def __init__(self):
+        self.script = None
+
+    @abc.abstractmethod
+    def extend_script(self, script: BaseLSLScript):
+        """Should only be called once, with a single script instance"""
+        if self.script:
+            raise RuntimeError("Extender already bound to a script")
+        self.script = script
+
+    def register_publisher(self):
+        self.script.event_publishers.setdefault(self, 0)
+        self.script.event_publishers[self] += 1
+
+    def unregister_publisher(self, *args):
+        self.script.event_publishers.setdefault(self, 1)
+        self.script.event_publishers[self] -= 1
+
+    def create_publisher_task(self, coro: Coroutine) -> asyncio.Task:
+        """Spawn a task from a coro, registering it as an event publisher and unregistering on completion"""
+        self.register_publisher()
+        task = asyncio.create_task(coro)
+        task.add_done_callback(self.unregister_publisher)
+        return task
+
+
+class TimerScriptExtender(ScriptExtender):
+    def __init__(self):
+        super().__init__()
+        self._timer_task: Optional[asyncio.Task] = None
+
+    def extend_script(self, script: BaseLSLScript):
+        super().extend_script(script)
+        self.script.builtin_funcs["llSetTimerEvent"] = self._set_timer_event
+
+    def _set_timer_event(self, seconds: float):
+        if self._timer_task and not self._timer_task.done():
+            # Should implicitly remove any event publisher registration
+            self._timer_task.cancel()
+
+        self._timer_task = None
+
+        if seconds:
+            # Have the timer tick in the background
+            self._timer_task = self.create_publisher_task(self._tick_every(seconds))
+
+    async def _tick_every(self, seconds: float):
+        # Stupid hack to make this stop ticking when the state changes.
+        # Maybe need hooks for state changes.
+        start_state = self.script.current_state
+        while True:
+            await asyncio.sleep(seconds)
+            # State changed while we were waiting, don't tick!
+            if start_state != self.script.current_state:
+                self._timer_task = None
+                return
+
+            # Only queue a timer event if one wasn't already pending
+            if all(x[0] != "timer" for x in self.script.event_queue):
+                # queue one up
+                self.script.queue_event("timer", ())
+
+
+class DateTimeScriptExtender(ScriptExtender):
+    def __init__(self):
+        super().__init__()
+        self.start_time = 0.0
+
+    def extend_script(self, script: BaseLSLScript):
+        super().extend_script(script)
+        self.start_time = time.time()
+        self.script.builtin_funcs['llResetTime'] = self._reset_time
+        self.script.builtin_funcs['llGetTime'] = lambda: time.time() - self.start_time
+        self.script.builtin_funcs['llGetAndResetTime'] = self._get_and_reset_time
+        self.script.builtin_funcs['llGetUnixTime'] = lambda: int(time.time())
+
+    def _reset_time(self):
+        self.start_time = time.time()
+
+    def _get_and_reset_time(self):
+        val = time.time() - self.start_time
+        self._reset_time()
+        return val

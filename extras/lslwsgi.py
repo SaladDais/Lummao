@@ -18,7 +18,7 @@ from quart import Quart, Request, Response, request
 from werkzeug.datastructures import Headers
 
 import lummao
-from lummao import Key, BaseLSLScript
+from lummao import Key, BaseLSLScript, ScriptExtender
 
 
 @dataclasses.dataclass
@@ -29,13 +29,13 @@ class RequestData:
     content_type: str = "text/plain"
 
 
-class LSLWSGIWrapper:
-    script: BaseLSLScript
+class LSLWSGIWrapper(ScriptExtender):
+    def __init__(self):
+        super().__init__()
+        self._pending_requests: Dict[Key, RequestData] = {}
 
-    def __init__(self, script: BaseLSLScript):
-        self.script: BaseLSLScript = script
-        self._pending_requests: Dict[Key, RequestData] = dict()
-
+    def extend_script(self, script: BaseLSLScript):
+        super().extend_script(script)
         script.builtin_funcs["llRequestURL"] = self._handle_url_request
         script.builtin_funcs["llRequestSecureURL"] = self._handle_url_request
         script.builtin_funcs["llOwnerSay"] = print
@@ -66,9 +66,6 @@ class LSLWSGIWrapper:
         resp = Response(body, status_code, content_type=req_data.content_type)
         req_data.resp_fut.set_result(resp)
 
-    async def execute(self) -> bool:
-        return await self.script.execute()
-
     async def handle_request(self):
         # LSL has a bunch of special internally-meaningful HTTP methods that shouldn't
         # be allowed in from the outside, like the URL grant ones. Whitelist HTTP methods.
@@ -84,10 +81,10 @@ class LSLWSGIWrapper:
         req_data.req_headers["x-remote-ip"] = request.remote_addr
         self._pending_requests[req_id] = req_data
 
-        str_body = (await request.data).decode("utf8")
-        self.script.queue_event("http_request", (req_id, request.method, str_body))
-
         try:
+            str_body = (await request.data).decode("utf8")
+            self.script.queue_event("http_request", (req_id, request.method, str_body))
+
             # Remember, the script responds by calling llHttpResponse(), and may leave
             # the event handler without ever calling it. It may also sleep for a long time
             # after responding. Handle that by kicking off an async task. Handler execution
@@ -117,19 +114,22 @@ def _get_server_url():
 
 def main():
     loop = asyncio.get_event_loop_policy().get_event_loop()
-    wrapped = LSLWSGIWrapper(lummao.compile_script_file(sys.argv[1]))
+    script = lummao.compile_script_file(sys.argv[1])
+    wsgi_wrapper = LSLWSGIWrapper()
+    wsgi_wrapper.extend_script(script)
     # Let LSL stand itself up and figure out its URL
-    loop.run_until_complete(wrapped.execute())
+    loop.run_until_complete(script.execute())
 
     app = Quart(__name__)
     # This essentially bypasses Quart's routing and passes every request to LSL
-    app.before_request(wrapped.handle_request)
+    app.before_request(wsgi_wrapper.handle_request)
     # Can't use reloader because it tries to reload the LSL!
     app.run(
         host=os.environ.get("SERVER_NAME", "localhost"),
         port=_get_server_port(),
         use_reloader=False,
     )
+    app.run_task()
 
 
 if __name__ == "__main__":
