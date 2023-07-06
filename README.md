@@ -25,26 +25,32 @@ pip install -e .
 
 ## How
 
-For a real-world example, see <https://github.com/SaladDais/SLGraphPather> or <https://github.com/SaladDais/SickJoke>'s
-tests and test coverage reporting.
+For a real-world example of local LSL testing with Lummao, see <https://github.com/SaladDais/SLGraphPather> or
+<https://github.com/SaladDais/SickJoke>'s tests and test coverage reporting.
 
 Along with the python API, a helper `lummao` script is provided that takes in an LSL file and outputs a python file.
 It can be invoked like `lummao input.lsl output.py`.
+
+If you just want to run an LSL script from the command-line, the `shellsl` command will be installed alongside `lummao`,
+and can be run from the commandline like so:
+
+```
+$ shellsl tests/test_resources/lsl_conformance.lsl
+All tests passed
+```
 
 ## Why
 
 If you've ever written a sufficiently complicated system in LSL, you know how annoying it is to debug your scripts
 or be sure if they're even correct. Clearly the sanest way to bring sanity to your workflow is to convert your LSL
-scripts to Python, so you can mock LSL library functions and use Python debuggers. Hence the name "Lummao".
+scripts to Python, so you can mock LSL library functions and use Python debuggers. Hence, the name "Lummao".
 
 ## TODO
 
 * Symbol shadowing behavior is not correct. Python has very different shadowing rules.
 * Provide mock helpers for: 
 * * inter-script communication
-* * HTTP
 * * auto-stubs for all functions
-* * state-aware event queueing
 
 ## License
 

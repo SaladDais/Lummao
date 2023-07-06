@@ -1,5 +1,5 @@
-#!/usr/local/bin/shellsl
-// obviously, shellsl has to be placed here for the shebang to work.
+#!/usr/bin/env shellsl
+// The shebang should allow executing LSL files directly!
 
 default {
     state_entry() {
