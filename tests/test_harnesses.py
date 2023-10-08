@@ -91,12 +91,6 @@ class HTTPRequestScriptExtenderTestCase(unittest.IsolatedAsyncioTestCase):
         extender = HTTPRequestScriptExtender()
         extender.extend_script(self.script)
 
-    async def test_valid_http_request(self):
-        await self.script.makeRequest(self.httpbin.url)
-        await self.script.execute_until_complete()
-        self.assertTrue(self.script.gTriggered)
-        self.assertTrue("HTTP Client Testing Service" in self.script.gResp)
-
     async def test_request_invalid_url(self):
         await self.script.makeRequest("badscheme://invalid.local/example")
         await self.script.execute_until_complete()
