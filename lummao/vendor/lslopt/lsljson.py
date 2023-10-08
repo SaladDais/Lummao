@@ -676,8 +676,7 @@ def llList2Json(kind, lst):
         ret = u'['
         if lst:
             ret += InternalElement2Json(lst[0], ParseNumbers=False)
-            del lst[0]
-            for elem in lst:
+            for elem in lst[1:]:
                 ret += u',' + InternalElement2Json(elem, ParseNumbers=False)
         ret += u']'
 
