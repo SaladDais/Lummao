@@ -3,6 +3,7 @@ import json
 import os.path
 import pathlib
 import unittest
+from unittest import mock
 
 import pytest_httpbin
 
@@ -62,6 +63,16 @@ class HarnessTestCase(unittest.IsolatedAsyncioTestCase):
         script.builtin_funcs["llOwnerSay"] = _mutate_global
         await script.edefaultstate_entry()
         self.assertEqual(script.gFoo, 1)
+
+    async def testuncleared_locals(self):
+        script = _compile_script_filename("uncleared_locals.lsl")
+        ownersay_mock = mock.MagicMock()
+        script.builtin_funcs["llOwnerSay"] = ownersay_mock
+        await script.edefaultstate_entry()
+        self.assertListEqual(
+            [mock.call("quux"), mock.call("quux")],
+            ownersay_mock.mock_calls,
+        )
 
     async def test_detected_function_wrappers(self):
         script = _compile_script_filename("detected_touch.lsl")
