@@ -64,7 +64,7 @@ class HarnessTestCase(unittest.IsolatedAsyncioTestCase):
         await script.edefaultstate_entry()
         self.assertEqual(script.gFoo, 1)
 
-    async def testuncleared_locals(self):
+    async def test_uncleared_locals(self):
         script = _compile_script_filename("uncleared_locals.lsl")
         ownersay_mock = mock.MagicMock()
         script.builtin_funcs["llOwnerSay"] = ownersay_mock
